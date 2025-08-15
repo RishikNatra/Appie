@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'screens/login_screen.dart'; // Import the new screen
+import 'screens/login_screen.dart';
+import 'theme.dart'; // Import custom theme
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,12 +18,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Healthcare App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: const LoginScreen(), // Set the LoginScreen as the home page
+      title: 'HealthCare Hub',
+      theme: themeData, // Use custom ThemeData from theme.dart
+      home: const LoginScreen(),
     );
   }
 }
