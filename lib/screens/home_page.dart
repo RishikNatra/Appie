@@ -1,23 +1,11 @@
 // Import Flutter's Material Design library
 import 'package:flutter/material.dart';
-
-// Import the existing LoginScreen to enable navigation
-import 'login_screen.dart';
+// New! Import Firebase Auth to handle signing out
+import 'package:firebase_auth/firebase_auth.dart';
 
 // Create a StatelessWidget for the HomePage
-// A StatelessWidget is used because the page itself doesn't need to manage state,
-// but it contains child widgets that might (like the animation below).
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  // Function to navigate to the LoginScreen
-  void _navigateToLogin(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const LoginScreen(),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,25 +13,27 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Appie'),
         backgroundColor: Theme.of(context).primaryColor,
+        // Updated! The actions list now has a Log Out button.
         actions: [
-          // A button in the app bar to navigate to the sign-in page
-          TextButton(
-            onPressed: () => _navigateToLogin(context),
-            child: const Text(
-              'Sign In',
-              style: TextStyle(color: Colors.white),
-            ),
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Log Out',
+            onPressed: () async {
+              // Sign the user out of Firebase
+              await FirebaseAuth.instance.signOut();
+              // The StreamBuilder in main.dart will automatically handle navigation
+              // back to the LoginScreen.
+            },
           ),
         ],
       ),
+      // The rest of your page body is completely unchanged.
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              // Animated sliding window for the welcome message
-              // This uses an AnimatedOpacity and a transform to create a smooth entrance effect.
               TweenAnimationBuilder(
                 tween: Tween<Offset>(
                   begin: const Offset(-200.0, 0.0),
@@ -70,12 +60,10 @@ class HomePage extends StatelessWidget {
                 style: TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 20),
-              // List of cards for common illnesses
               const IllnessCard(title: 'Fever'),
               const IllnessCard(title: 'Cold & Cough'),
               const IllnessCard(title: 'Headache'),
               const SizedBox(height: 20),
-              // Card for "illness not listed"
               Card(
                 color: Colors.grey[200],
                 elevation: 4,
@@ -96,7 +84,7 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// A custom widget for the illness cards to reuse the same style
+// The custom IllnessCard widget is unchanged.
 class IllnessCard extends StatelessWidget {
   final String title;
 
