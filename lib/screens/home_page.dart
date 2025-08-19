@@ -1,4 +1,4 @@
-import 'dart:ui'; // Added for ImageFilter
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,7 +14,6 @@ class HomePage extends StatelessWidget {
     if (user == null) {
       return {'name': 'Guest', 'email': 'Not logged in'};
     }
-
     try {
       final doc = await FirebaseFirestore.instance
           .collection('users')
@@ -43,7 +42,7 @@ class HomePage extends StatelessWidget {
   void _showProfilePopup(BuildContext context) {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.2),
+      barrierColor: Colors.transparent, // Remove global barrier color
       barrierDismissible: true,
       builder: (BuildContext context) {
         return FutureBuilder<Map<String, String>>(
@@ -112,126 +111,215 @@ class HomePage extends StatelessWidget {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth > 1200 ? 1200.0 : constraints.maxWidth;
+          final padding = constraints.maxWidth > 800 ? 32.0 : constraints.maxWidth > 600 ? 24.0 : 16.0;
+          final columns = constraints.maxWidth > 1024 ? 3 : constraints.maxWidth > 768 ? 2 : 1;
+
           return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome to Appie',
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFF29ABE2), // --primary
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'What are your symptoms today?',
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: const Color(0xFF718096), // --muted-foreground
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  IllnessCard(
-                    title: 'Fever',
-                    icon: FontAwesomeIcons.thermometer,
-                    color: 'blue',
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 12),
-                  IllnessCard(
-                    title: 'Cold & Cough',
-                    icon: FontAwesomeIcons.lungs,
-                    color: 'green',
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 12),
-                  IllnessCard(
-                    title: 'Headache',
-                    icon: FontAwesomeIcons.headSideVirus,
-                    color: 'orange',
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Card(
-                      color: Colors.white, // --card
-                      elevation: 2,
-                      shadowColor: Colors.black.withOpacity(0.1),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Illness not listed here?',
+            child: Center(
+              child: Container(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                padding: EdgeInsets.symmetric(horizontal: padding, vertical: 32),
+                child: Column(
+                  children: [
+                    // Welcome Section
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 500),
+                      opacity: 1.0,
+                      child: Column(
+                        children: [
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [Color(0xFF29ABE2), Color(0xFF16A085)], // --primary to --health-green
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ).createShader(bounds),
+                            child: Text(
+                              'Welcome to Appie Health',
+                              textAlign: TextAlign.center,
                               style: GoogleFonts.poppins(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF29ABE2), // --primary
+                                fontSize: constraints.maxWidth > 600 ? 48 : 36,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white, // White for shader effect
                               ),
                             ),
-                            Container(
-                              alignment: Alignment.center,
-                              width: 24,
-                              child: const Icon(
-                                Icons.arrow_forward_ios,
-                                color: Color(0xFF29ABE2), // --primary
-                                size: 14,
-                              ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Tell us about your symptoms and get personalized health guidance tailored just for you',
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFF718096), // --muted-foreground
+                            ),
+                            maxLines: 2,
+                          ),
+                          const SizedBox(height: 48),
+                        ],
+                      ),
+                    ),
+                    // Common Symptoms
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Common Symptoms',
+                          style: GoogleFonts.poppins(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF2D3748), // --foreground
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        GridView.count(
+                          crossAxisCount: columns,
+                          crossAxisSpacing: 24,
+                          mainAxisSpacing: 24,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            IllnessCard(
+                              title: 'Fever',
+                              description: 'High temperature, chills, and body aches',
+                              icon: FontAwesomeIcons.thermometer,
+                              color: 'red',
+                              onTap: () {},
+                            ),
+                            IllnessCard(
+                              title: 'Cold & Cough',
+                              description: 'Runny nose, sneezing, and throat irritation',
+                              icon: FontAwesomeIcons.lungs,
+                              color: 'blue',
+                              onTap: () {},
+                            ),
+                            IllnessCard(
+                              title: 'Headache',
+                              description: 'Head pain, tension, and sensitivity',
+                              icon: FontAwesomeIcons.brain,
+                              color: 'purple',
+                              onTap: () {},
                             ),
                           ],
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: constraints.maxWidth > 800 ? 220 : double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 2,
-                        shadowColor: Colors.black.withOpacity(0.1),
-                        backgroundColor: Colors.transparent,
-                        surfaceTintColor: Colors.transparent,
-                      ),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [Color(0xFF29ABE2), Color(0xFF1A87C2)], // --primary to darker blue
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                    const SizedBox(height: 32),
+                    // Other Conditions
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Other Conditions',
+                          style: GoogleFonts.poppins(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFF2D3748), // --foreground
                           ),
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Center(
-                          child: Text(
-                            'EXPLORE MORE',
-                            style: GoogleFonts.poppins(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                        const SizedBox(height: 24),
+                        GridView.count(
+                          crossAxisCount: constraints.maxWidth > 768 ? 4 : 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: [
+                            'Diabetes',
+                            'Hypertension',
+                            'Asthma',
+                            'Allergies',
+                          ].map((condition) {
+                            return GestureDetector(
+                              onTap: () {},
+                              child: Card(
+                                color: Colors.white, // --card
+                                elevation: 2,
+                                shadowColor: Colors.black.withOpacity(0.1),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: const BorderSide(color: Color(0xFFDEE2E6)), // --border
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Center(
+                                    child: Text(
+                                      condition,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFF2D3748), // --foreground
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    // Illness Not Listed
+                    IllnessCard(
+                      title: 'My illness is not listed',
+                      description: 'Describe your symptoms in detail for personalized assistance',
+                      icon: Icons.add,
+                      color: 'green',
+                      onTap: () {},
+                    ),
+                    const SizedBox(height: 32),
+                    // Explore More Button
+                    SizedBox(
+                      width: constraints.maxWidth > 800 ? 320 : double.infinity,
+                      child: InkWell(
+                        onTap: () {},
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF29ABE2), Color(0xFF1A87C2)], // --primary to darker blue
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.15),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Reduced horizontal padding
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min, // Fit content
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'Explore More Health Topics',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.arrow_forward,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
@@ -243,6 +331,7 @@ class HomePage extends StatelessWidget {
 
 class IllnessCard extends StatelessWidget {
   final String title;
+  final String? description;
   final IconData icon;
   final String color;
   final VoidCallback? onTap;
@@ -250,20 +339,18 @@ class IllnessCard extends StatelessWidget {
   const IllnessCard({
     super.key,
     required this.title,
+    this.description,
     required this.icon,
     required this.color,
     this.onTap,
   });
 
-  // Map color prop to gradient colors
   List<Color> _getGradientColors() {
     switch (color) {
       case 'blue':
-        return [const Color(0xFF29ABE2), const Color(0xFF1A87C2)]; // --health-blue to --primary
+        return [const Color(0xFF29ABE2), const Color(0xFF1A87C2)]; // --health-blue to darker blue
       case 'green':
         return [const Color(0xFF16A085), const Color(0xFF0E8A6B)]; // --health-green to darker green
-      case 'orange':
-        return [const Color(0xFFF68C38), const Color(0xFFD6722E)]; // --health-orange to darker orange
       case 'red':
         return [const Color(0xFFF44336), const Color(0xFFD32F2F)]; // --health-red to darker red
       case 'purple':
@@ -283,10 +370,12 @@ class IllnessCard extends StatelessWidget {
         shadowColor: Colors.black.withOpacity(0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFDEE2E6)), // --border
         ),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 48,
@@ -318,6 +407,17 @@ class IllnessCard extends StatelessWidget {
                         color: const Color(0xFF2D3748), // --foreground
                       ),
                     ),
+                    if (description != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        description!,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: const Color(0xFF718096), // --muted-foreground
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -345,18 +445,22 @@ class _ProfilePopup extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
+      insetPadding: const EdgeInsets.all(16), // Ensure proper padding
       child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
         children: [
           // Blurred backdrop
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(color: Colors.black.withOpacity(0.2)),
+              child: Container(
+                color: Colors.black.withOpacity(0.2),
+              ),
             ),
           ),
           // Popup content
           Container(
-            margin: const EdgeInsets.only(top: 80),
             constraints: const BoxConstraints(maxWidth: 384),
             decoration: BoxDecoration(
               color: Colors.white,
