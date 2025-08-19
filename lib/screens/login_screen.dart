@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // --- All controllers and Firebase instances are unchanged ---
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -20,23 +20,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final _firestore = FirebaseFirestore.instance;
 
   bool _isLoginView = true;
-
-  // --- New! State variables to manage our custom notification ---
   String? _notificationMessage;
   bool _isErrorNotification = false;
   Timer? _notificationTimer;
 
-  // Updated! This helper function now shows our custom notification widget.
   void _showNotification(String message, {bool isError = false}) {
-    // Cancel any existing timer to avoid the notification disappearing too early
     _notificationTimer?.cancel();
-
     setState(() {
       _notificationMessage = message;
       _isErrorNotification = isError;
     });
-
-    // Set a timer to hide the notification after 3 seconds
     _notificationTimer = Timer(const Duration(seconds: 3), () {
       setState(() {
         _notificationMessage = null;
@@ -44,10 +37,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  // Updated! Now correctly handles 'invalid-credential'.
-  // Updated! Now handles both error types with one message.
-  // Updated! This function now uses a switch statement for cleaner error handling.
-  // Updated! Handles invalid email format and unifies credential errors.
   Future<void> _signIn() async {
     _showNotification("Signing In...");
     try {
@@ -58,20 +47,15 @@ class _LoginScreenState extends State<LoginScreen> {
       _showNotification("Login Successful!");
     } on FirebaseAuthException catch (e) {
       String errorMessage;
-      // Using a switch statement to handle specific error codes
       switch (e.code) {
-      // New! Handles badly formatted emails.
         case 'invalid-email':
           errorMessage = 'Please enter a valid email address.';
           break;
-
-      // Updated! Combined cases for better security.
         case 'user-not-found':
         case 'wrong-password':
         case 'invalid-credential':
           errorMessage = 'Invalid username or password.';
           break;
-
         case 'user-disabled':
           errorMessage = 'Your account has been disabled.';
           break;
@@ -85,15 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
           errorMessage = 'Invalid username or password.';
       }
       _showNotification(errorMessage, isError: true);
-    }
-  }
-
-  // All other functions (_signUp, dispose, etc.) are unchanged.
-  void _submitForm() {
-    if (_isLoginView) {
-      _signIn();
-    } else {
-      _signUp();
     }
   }
 
@@ -134,6 +109,14 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _submitForm() {
+    if (_isLoginView) {
+      _signIn();
+    } else {
+      _signUp();
+    }
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -143,10 +126,10 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // The main build method is now wrapped in a Stack to show the notification
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5FBFE), // --background
       body: Stack(
         children: [
           LayoutBuilder(
@@ -158,14 +141,12 @@ class _LoginScreenState extends State<LoginScreen> {
               }
             },
           ),
-          // New! This is our custom notification widget
           _buildNotificationWidget(),
         ],
       ),
     );
   }
 
-  // New! A dedicated widget for the custom notification.
   Widget _buildNotificationWidget() {
     return Align(
       alignment: Alignment.bottomRight,
@@ -173,40 +154,46 @@ class _LoginScreenState extends State<LoginScreen> {
         duration: const Duration(milliseconds: 300),
         opacity: _notificationMessage == null ? 0.0 : 1.0,
         child: Container(
-          width: 200, // Matches the button width
-          margin: const EdgeInsets.all(24),
+          width: 220,
+          margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: _isErrorNotification ? Colors.redAccent : const Color(0xFF2D9A7A),
-            borderRadius: BorderRadius.circular(30), // Pill shape
-            boxShadow: const [
+            gradient: LinearGradient(
+              colors: _isErrorNotification
+                  ? [const Color(0xFFF44336), const Color(0xFFD32F2F)] // --health-red to darker red
+                  : [const Color(0xFF29ABE2), const Color(0xFF1A87C2)], // --primary to darker blue
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
               BoxShadow(
-                color: Colors.black26,
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 10,
-                offset: Offset(0, 4),
-              )
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
           child: Text(
             _notificationMessage ?? '',
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
     );
   }
 
-  // All other UI build methods are unchanged
   Widget _buildWideLayout() {
     return Row(
       children: [
         Expanded(
           flex: 2,
-          child: Container(
-            color: const Color(0xFF2D9A7A),
-            child: _buildWelcomePanel(),
-          ),
+          child: _buildWelcomePanel(),
         ),
         Expanded(
           flex: 3,
@@ -220,7 +207,13 @@ class _LoginScreenState extends State<LoginScreen> {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(opacity: animation, child: child);
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(1.0, 0.0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: FadeTransition(opacity: animation, child: child),
+        );
       },
       child: _isLoginView ? _buildWelcomePanel(isNarrow: true) : _buildAuthFormNarrow(isNarrow: true),
     );
@@ -229,38 +222,78 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildWelcomePanel({bool isNarrow = false}) {
     return Container(
       key: ValueKey('welcome_$_isLoginView'),
-      color: const Color(0xFF2D9A7A),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF29ABE2), Color(0xFF16A085)], // --primary to --health-green
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
       alignment: Alignment.center,
       child: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.apple, color: Colors.white, size: 80),
+            const Icon(
+              FontAwesomeIcons.heartPulse,
+              color: Colors.white,
+              size: 64,
+            ),
             const SizedBox(height: 16),
             Text(
               _isLoginView ? 'New to Appie?' : 'Welcome Back!',
-              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               _isLoginView
                   ? 'Sign up and discover a new way to connect.'
                   : 'To keep connected with us please login with your personal info.',
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16, color: Colors.white70),
-            ),
-            const SizedBox(height: 32),
-            OutlinedButton(
-              onPressed: () => setState(() => _isLoginView = !_isLoginView),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
-                side: const BorderSide(color: Colors.white, width: 2),
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Colors.white.withOpacity(0.8),
               ),
-              child: Text(_isLoginView ? 'SIGN UP' : 'SIGN IN'),
-            )
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () => setState(() => _isLoginView = !_isLoginView),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 2,
+                shadowColor: Colors.black.withOpacity(0.1),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF29ABE2), Color(0xFF1A87C2)], // --primary to darker blue
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Center(
+                  child: Text(
+                    _isLoginView ? 'SIGN UP' : 'SIGN IN',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -270,57 +303,12 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildAuthFormNarrow({bool isNarrow = false}) {
     return Container(
       key: ValueKey('auth_form_$_isLoginView'),
-      color: Colors.white,
+      color: const Color(0xFFF5FBFE), // --background
       alignment: Alignment.center,
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                _isLoginView ? 'Sign In to Appie' : 'Create Account',
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF2D9A7A)),
-              ),
-              const SizedBox(height: 16),
-              _buildSocialLogins(),
-              const SizedBox(height: 16),
-              Text('or use your email for ${_isLoginView ? "login" : "registration"}', style: TextStyle(color: Colors.grey.shade600)),
-              const SizedBox(height: 24),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                child: _isLoginView ? const SizedBox.shrink() : _buildTextField(_nameController, 'Name', Icons.person_outline),
-              ),
-              if (!_isLoginView) const SizedBox(height: 16),
-              _buildTextField(_emailController, 'Email', Icons.email_outlined, isFirstField: _isLoginView),
-              const SizedBox(height: 16),
-              _buildTextField(_passwordController, 'Password', Icons.lock_outline, isPassword: true),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _submitForm, // Updated!
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D9A7A),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                  ),
-                  child: Text(
-                    _isLoginView ? 'SIGN IN' : 'SIGN UP',
-                    style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              if (isNarrow)
-                TextButton(
-                  onPressed: () => setState(() => _isLoginView = !_isLoginView),
-                  child: Text(
-                    _isLoginView ? 'Need an account? Sign Up' : 'Have an account? Sign In',
-                    style: const TextStyle(color: Color(0xFF2D9A7A)),
-                  ),
-                )
-            ],
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: _buildAuthFormContent(isNarrow: isNarrow),
         ),
       ),
     );
@@ -329,49 +317,109 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildAuthForm({bool isNarrow = false}) {
     return Container(
       key: ValueKey('auth_form_$_isLoginView'),
-      color: Colors.white,
+      color: const Color(0xFFF5FBFE), // --background
       alignment: Alignment.center,
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                _isLoginView ? 'Sign In to Appie' : 'Create Account',
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF2D9A7A)),
+          child: _buildAuthFormContent(isNarrow: isNarrow),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAuthFormContent({bool isNarrow = false}) {
+    return Card(
+      color: Colors.white, // --card
+      elevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _isLoginView ? 'Sign In to Appie' : 'Create Account',
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF29ABE2), // --primary
               ),
-              const SizedBox(height: 16),
-              _buildSocialLogins(),
-              const SizedBox(height: 16),
-              Text('or use your email for ${_isLoginView ? "login" : "registration"}', style: TextStyle(color: Colors.grey.shade600)),
-              const SizedBox(height: 24),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 300),
-                child: _isLoginView ? const SizedBox.shrink() : _buildTextField(_nameController, 'Name', Icons.person_outline, isFirstField: true),
+            ),
+            const SizedBox(height: 16),
+            _buildSocialLogins(),
+            const SizedBox(height: 16),
+            Text(
+              'or use your email for ${_isLoginView ? "login" : "registration"}',
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: const Color(0xFF718096), // --muted-foreground
               ),
-              if (!_isLoginView) const SizedBox(height: 16),
-              _buildTextField(_emailController, 'Email', Icons.email_outlined, isFirstField: _isLoginView),
-              const SizedBox(height: 16),
-              _buildTextField(_passwordController, 'Password', Icons.lock_outline, isPassword: true),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: 200, // Fixed width for the button
-                child: ElevatedButton(
-                  onPressed: _submitForm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D9A7A),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            ),
+            const SizedBox(height: 24),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              child: _isLoginView
+                  ? const SizedBox.shrink()
+                  : _buildTextField(_nameController, 'Name', Icons.person_outline),
+            ),
+            if (!_isLoginView) const SizedBox(height: 16),
+            _buildTextField(_emailController, 'Email', Icons.email_outlined, isFirstField: _isLoginView),
+            const SizedBox(height: 16),
+            _buildTextField(_passwordController, 'Password', Icons.lock_outline, isPassword: true),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: isNarrow ? double.infinity : 220,
+              child: ElevatedButton(
+                onPressed: _submitForm,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 2,
+                  shadowColor: Colors.black.withOpacity(0.1),
+                ),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF29ABE2), Color(0xFF1A87C2)], // --primary to darker blue
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
                   ),
-                  child: Text(
-                    _isLoginView ? 'SIGN IN' : 'SIGN UP',
-                    style: const TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Center(
+                    child: Text(
+                      _isLoginView ? 'SIGN IN' : 'SIGN UP',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+            if (isNarrow)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: TextButton(
+                  onPressed: () => setState(() => _isLoginView = !_isLoginView),
+                  child: Text(
+                    _isLoginView ? 'Need an account? Sign Up' : 'Have an account? Sign In',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF29ABE2), // --primary
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -382,22 +430,37 @@ class _LoginScreenState extends State<LoginScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildSocialButton(FontAwesomeIcons.google, () {}),
-        const SizedBox(width: 20),
+        const SizedBox(width: 16),
         _buildSocialButton(FontAwesomeIcons.facebookF, () {}),
-        const SizedBox(width: 20),
+        const SizedBox(width: 16),
         _buildSocialButton(FontAwesomeIcons.linkedinIn, () {}),
       ],
     );
   }
 
   Widget _buildSocialButton(IconData icon, VoidCallback onPressed) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-          shape: const CircleBorder(),
-          padding: const EdgeInsets.all(16),
-          side: BorderSide(color: Colors.grey.shade300)),
-      child: FaIcon(icon, color: const Color(0xFF2D9A7A), size: 20),
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFFE6F7FA), // --health-blue-light
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: FaIcon(
+          icon,
+          color: const Color(0xFF29ABE2), // --primary
+          size: 20,
+        ),
+      ),
     );
   }
 
@@ -417,13 +480,24 @@ class _LoginScreenState extends State<LoginScreen> {
       },
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon, color: Colors.grey.shade500),
+        labelStyle: GoogleFonts.poppins(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: const Color(0xFF718096), // --muted-foreground
+        ),
+        prefixIcon: Icon(icon, color: const Color(0xFF718096)),
         filled: true,
-        fillColor: Colors.grey.shade100,
+        fillColor: const Color(0xFFE6F7FA), // --health-blue-light
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      style: GoogleFonts.poppins(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        color: const Color(0xFF2D3748), // --foreground
       ),
     );
   }
