@@ -12,7 +12,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. ENUMS & TYPES
 -- ------------------------------------------------------------------------------
 DO $$ BEGIN
-    CREATE TYPE user_role AS ENUM ('patient', 'health_professional', 'admin');
+    CREATE TYPE user_role AS ENUM ('patient', 'health_professional', 'pharmacist', 'delivery_partner', 'admin');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
@@ -141,6 +141,126 @@ ON public.health_professional_profiles FOR UPDATE
 TO authenticated 
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
+
+-- ------------------------------------------------------------------------------
+-- 3B. PHARMACY PROFILES TABLE (Medication & Dispensing Partners)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.pharmacy_profiles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL UNIQUE REFERENCES public.profiles(id) ON DELETE CASCADE,
+    pharmacy_name TEXT NOT NULL,
+    pharmacist_name TEXT NOT NULL,
+    pharmacy_type TEXT CHECK (pharmacy_type IN ('retail', 'hospital', 'community', 'chain')) DEFAULT 'retail',
+    gst_number TEXT NOT NULL,
+    drug_license_number TEXT NOT NULL, -- Form 20 / Form 21
+    pharmacy_council_reg_no TEXT NOT NULL,
+    pharmacy_address TEXT NOT NULL,
+    city TEXT NOT NULL,
+    state TEXT NOT NULL,
+    pincode TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    verification_status verification_status_type NOT NULL DEFAULT 'pending',
+    verification_notes TEXT,
+    certificate_url TEXT,
+    verified_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+
+    -- Database-level check constraints
+    CONSTRAINT pharmacy_name_length_check CHECK (char_length(pharmacy_name) >= 2 AND char_length(pharmacy_name) <= 100),
+    CONSTRAINT drug_license_length_check CHECK (char_length(drug_license_number) >= 4)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pharmacy_profiles_user_id ON public.pharmacy_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_pharmacy_profiles_city ON public.pharmacy_profiles(city);
+CREATE INDEX IF NOT EXISTS idx_pharmacy_profiles_status ON public.pharmacy_profiles(verification_status);
+
+-- Enable RLS
+ALTER TABLE public.pharmacy_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Pharmacy RLS Policies
+CREATE POLICY "Pharmacists view own profile"
+ON public.pharmacy_profiles FOR SELECT
+TO authenticated
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Anyone can view verified pharmacies"
+ON public.pharmacy_profiles FOR SELECT
+TO authenticated
+USING (verification_status = 'verified');
+
+CREATE POLICY "Pharmacists insert own profile"
+ON public.pharmacy_profiles FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Pharmacists update own profile"
+ON public.pharmacy_profiles FOR UPDATE
+TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Pharmacists delete own profile"
+ON public.pharmacy_profiles FOR DELETE
+TO authenticated
+USING (auth.uid() = user_id);
+
+-- ------------------------------------------------------------------------------
+-- 3C. DELIVERY PARTNER PROFILES TABLE (Pharmaceutical Logistics Fleet)
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.delivery_partner_profiles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL UNIQUE REFERENCES public.profiles(id) ON DELETE CASCADE,
+    full_name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    date_of_birth DATE,
+    gender TEXT,
+    vehicle_type TEXT CHECK (vehicle_type IN ('motorcycle', 'scooter', 'electric_vehicle', 'bicycle')) DEFAULT 'motorcycle',
+    vehicle_registration_number TEXT NOT NULL,
+    driving_license_number TEXT NOT NULL,
+    city TEXT NOT NULL,
+    operating_zone TEXT NOT NULL,
+    verification_status verification_status_type NOT NULL DEFAULT 'pending',
+    verification_notes TEXT,
+    vehicle_rc_url TEXT,
+    driving_license_url TEXT,
+    verified_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+
+    -- Database-level check constraints
+    CONSTRAINT vehicle_rc_length_check CHECK (char_length(vehicle_registration_number) >= 4),
+    CONSTRAINT driving_license_length_check CHECK (char_length(driving_license_number) >= 4)
+);
+
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_user_id ON public.delivery_partner_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_city ON public.delivery_partner_profiles(city);
+CREATE INDEX IF NOT EXISTS idx_delivery_partner_status ON public.delivery_partner_profiles(verification_status);
+
+-- Enable RLS
+ALTER TABLE public.delivery_partner_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Delivery Partner RLS Policies
+CREATE POLICY "Delivery partners view own profile"
+ON public.delivery_partner_profiles FOR SELECT
+TO authenticated
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Delivery partners insert own profile"
+ON public.delivery_partner_profiles FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Delivery partners update own profile"
+ON public.delivery_partner_profiles FOR UPDATE
+TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Delivery partners delete own profile"
+ON public.delivery_partner_profiles FOR DELETE
+TO authenticated
+USING (auth.uid() = user_id);
 
 -- ------------------------------------------------------------------------------
 -- 4. HEALTH PROFILES TABLE (Patient Medical & Health Data)

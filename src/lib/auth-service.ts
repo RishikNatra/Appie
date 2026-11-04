@@ -6,6 +6,8 @@ import {
   verifyCode,
   updateUserProfile,
   updateHealthProfessionalDetails,
+  updatePharmacistDetails,
+  updateDeliveryPartnerDetails,
   getUserProfile,
 } from "./account-service";
 
@@ -13,7 +15,7 @@ export interface AuthUser {
   id: string;
   email: string;
   username: string;
-  role: "patient" | "health_professional";
+  role: "patient" | "health_professional" | "pharmacist" | "delivery_partner" | "admin";
   fullName?: string;
   isVerified?: boolean;
 }
@@ -43,6 +45,34 @@ export const demoUsers: Map<string, { user: AuthUser; passwordHash: string }> = 
         username: "dr_sharma",
         role: "health_professional",
         fullName: "Dr. Ananya Sharma",
+        isVerified: true,
+      },
+      passwordHash: "Password123!",
+    },
+  ],
+  [
+    "pharmacist@appie.health",
+    {
+      user: {
+        id: "demo-pharmacist-001",
+        email: "pharmacist@appie.health",
+        username: "medplus_pharma",
+        role: "pharmacist",
+        fullName: "Vikrant Joshi (MedPlus Pharmacy)",
+        isVerified: true,
+      },
+      passwordHash: "Password123!",
+    },
+  ],
+  [
+    "delivery@appie.health",
+    {
+      user: {
+        id: "demo-delivery-001",
+        email: "delivery@appie.health",
+        username: "swift_delivery",
+        role: "delivery_partner",
+        fullName: "Arun Kumar",
         isVerified: true,
       },
       passwordHash: "Password123!",
@@ -79,10 +109,16 @@ export async function registerUser(input: RegisterInput): Promise<{
   if (isLiveSupabaseConfigured()) {
     try {
       const supabase = await createServerSupabaseClient();
-      const fullName =
-        input.role === "patient"
-          ? `${input.firstName} ${input.lastName}`.trim()
-          : input.fullName;
+      let fullName = "";
+      if (input.role === "patient") {
+        fullName = `${input.firstName} ${input.lastName}`.trim();
+      } else if (input.role === "health_professional") {
+        fullName = `${input.prefix} ${input.fullName}`.trim();
+      } else if (input.role === "pharmacist") {
+        fullName = `${input.pharmacistName} (${input.pharmacyName})`.trim();
+      } else if (input.role === "delivery_partner") {
+        fullName = input.fullName.trim();
+      }
 
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
@@ -130,10 +166,16 @@ export async function registerUser(input: RegisterInput): Promise<{
   }
 
   const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-  const fullName =
-    input.role === "patient"
-      ? `${input.firstName} ${input.lastName}`.trim()
-      : input.fullName;
+  let fullName = "";
+  if (input.role === "patient") {
+    fullName = `${input.firstName} ${input.lastName}`.trim();
+  } else if (input.role === "health_professional") {
+    fullName = `${input.prefix} ${input.fullName}`.trim();
+  } else if (input.role === "pharmacist") {
+    fullName = `${input.pharmacistName} (${input.pharmacyName})`.trim();
+  } else if (input.role === "delivery_partner") {
+    fullName = input.fullName.trim();
+  }
 
   const newUser: AuthUser = {
     id: userId,
@@ -149,7 +191,7 @@ export async function registerUser(input: RegisterInput): Promise<{
     passwordHash: input.password,
   });
 
-  // Populate detailed user profile
+  // Populate detailed user profile based on role
   if (input.role === "patient") {
     await updateUserProfile(userId, {
       id: userId,
@@ -172,7 +214,7 @@ export async function registerUser(input: RegisterInput): Promise<{
       isVerified: true,
       twoFactorEnabled: false,
     });
-  } else {
+  } else if (input.role === "health_professional") {
     await updateUserProfile(userId, {
       id: userId,
       role: "health_professional",
@@ -184,7 +226,7 @@ export async function registerUser(input: RegisterInput): Promise<{
       gender: input.gender,
       addressLine1: input.clinicAddress,
       isVerified: false,
-      twoFactorEnabled: false,
+      twoFactorEnabled: true,
     });
 
     await updateHealthProfessionalDetails(userId, {
@@ -197,6 +239,70 @@ export async function registerUser(input: RegisterInput): Promise<{
       yearsOfExperience: input.yearsOfExperience,
       clinicAddress: input.clinicAddress,
       verificationStatus: "pending",
+    });
+  } else if (input.role === "pharmacist") {
+    await updateUserProfile(userId, {
+      id: userId,
+      role: "pharmacist",
+      email: cleanEmail,
+      username: cleanUsername,
+      fullName: `${input.pharmacistName} (${input.pharmacyName})`,
+      phone: input.phone,
+      addressLine1: input.pharmacyAddress,
+      city: input.city,
+      state: input.state,
+      pincode: input.pincode,
+      isVerified: false,
+      twoFactorEnabled: true,
+    });
+
+    await updatePharmacistDetails(userId, {
+      userId,
+      pharmacyName: input.pharmacyName,
+      pharmacistName: input.pharmacistName,
+      pharmacyType: input.pharmacyType,
+      gstNumber: input.gstNumber,
+      drugLicenseNumber: input.drugLicenseNumber,
+      pharmacyCouncilRegNo: input.pharmacyCouncilRegNo,
+      pharmacyAddress: input.pharmacyAddress,
+      city: input.city,
+      state: input.state,
+      pincode: input.pincode,
+      phone: input.phone,
+      certificateFileName: input.certificateFileName || "Drug_License_Certificate.pdf",
+      verificationStatus: "pending",
+      verificationNotes: "Pharmacy certificate submitted for CDSCO/State compliance audit.",
+    });
+  } else if (input.role === "delivery_partner") {
+    await updateUserProfile(userId, {
+      id: userId,
+      role: "delivery_partner",
+      email: cleanEmail,
+      username: cleanUsername,
+      fullName: input.fullName,
+      phone: input.phone,
+      dateOfBirth: input.dateOfBirth,
+      gender: (input.gender as "male" | "female" | "other" | "prefer_not_to_say") || "other",
+      city: input.city,
+      addressLine1: input.operatingZone,
+      isVerified: false,
+      twoFactorEnabled: true,
+    });
+
+    await updateDeliveryPartnerDetails(userId, {
+      userId,
+      fullName: input.fullName,
+      phone: input.phone,
+      dateOfBirth: input.dateOfBirth,
+      gender: input.gender,
+      vehicleType: input.vehicleType,
+      vehicleRegistrationNumber: input.vehicleRegistrationNumber,
+      drivingLicenseNumber: input.drivingLicenseNumber,
+      city: input.city,
+      operatingZone: input.operatingZone,
+      vehicleRcFileName: input.vehicleRcFileName || "Vehicle_RC_Certificate.pdf",
+      verificationStatus: "pending",
+      verificationNotes: "Vehicle RC and Driving License submitted for transport verification.",
     });
   }
 
@@ -298,15 +404,22 @@ export async function loginUser(input: LoginInput): Promise<{
     };
   }
 
-  // Enforce role consistency
-  if (matchedEntry.user.role !== input.role) {
+  // Enforce role consistency if role parameter was explicitly passed
+  if (input.role && matchedEntry.user.role !== input.role) {
+    const roleLabels: Record<string, string> = {
+      patient: "Patient",
+      health_professional: "Doctor",
+      pharmacist: "Pharmacist",
+      delivery_partner: "Delivery Partner",
+      admin: "Administrator",
+    };
     return {
       success: false,
       error: `This account is registered as a ${
-        matchedEntry.user.role === "patient" ? "Patient" : "Health Professional"
-      }. Please switch to the ${
-        matchedEntry.user.role === "patient" ? "Patient" : "Health Professional"
-      } portal.`,
+        roleLabels[matchedEntry.user.role] || matchedEntry.user.role
+      }. Please select the ${
+        roleLabels[matchedEntry.user.role] || matchedEntry.user.role
+      } tab to sign in.`,
     };
   }
 

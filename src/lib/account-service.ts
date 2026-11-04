@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import {
   UserProfile,
   HealthProfessionalDetails,
+  PharmacistDetails,
+  DeliveryPartnerDetails,
   HealthProfile,
   UserConsentItem,
   UserSettings,
@@ -69,6 +71,54 @@ const profilesStore = new Map<string, UserProfile>([
       updatedAt: new Date().toISOString(),
     },
   ],
+  [
+    "demo-pharmacist-001",
+    {
+      id: "demo-pharmacist-001",
+      role: "pharmacist",
+      email: "pharmacist@appie.health",
+      username: "medplus_pharma",
+      fullName: "Vikrant Joshi (MedPlus Pharmacy)",
+      firstName: "Vikrant",
+      lastName: "Joshi",
+      phone: "+91 98450 77112",
+      dateOfBirth: "1985-11-12",
+      gender: "male",
+      avatarUrl: "",
+      addressLine1: "MedPlus Pharmacy, Ground Floor, #12 CMH Road",
+      city: "Bengaluru",
+      state: "Karnataka",
+      pincode: "560038",
+      isVerified: true,
+      twoFactorEnabled: true,
+      createdAt: new Date(Date.now() - 40 * 24 * 3600 * 1000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ],
+  [
+    "demo-delivery-001",
+    {
+      id: "demo-delivery-001",
+      role: "delivery_partner",
+      email: "delivery@appie.health",
+      username: "swift_delivery",
+      fullName: "Arun Kumar",
+      firstName: "Arun",
+      lastName: "Kumar",
+      phone: "+91 97410 99882",
+      dateOfBirth: "1996-03-24",
+      gender: "male",
+      avatarUrl: "",
+      addressLine1: "BTM 2nd Stage",
+      city: "Bengaluru",
+      state: "Karnataka",
+      pincode: "560076",
+      isVerified: true,
+      twoFactorEnabled: true,
+      createdAt: new Date(Date.now() - 20 * 24 * 3600 * 1000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ],
 ]);
 
 const healthProfDetailsStore = new Map<string, HealthProfessionalDetails>([
@@ -90,6 +140,59 @@ const healthProfDetailsStore = new Map<string, HealthProfessionalDetails>([
       idProofDocumentName: "Aadhaar_Official_ID.pdf",
       verifiedAt: new Date(Date.now() - 55 * 24 * 3600 * 1000).toISOString(),
       createdAt: new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ],
+]);
+
+export const pharmacistsStore = new Map<string, PharmacistDetails>([
+  [
+    "demo-pharmacist-001",
+    {
+      id: "pharma-001",
+      userId: "demo-pharmacist-001",
+      pharmacyName: "MedPlus Pharmacy - Indiranagar",
+      pharmacistName: "Vikrant Joshi, B.Pharm",
+      pharmacyType: "retail",
+      gstNumber: "29ABCDE1234F1Z5",
+      drugLicenseNumber: "KA-BLR-20B-98741 / 21B-98742",
+      pharmacyCouncilRegNo: "KSPC-REG-54812",
+      pharmacyAddress: "Ground Floor, #12 CMH Road, Indiranagar, Bengaluru",
+      city: "Bengaluru",
+      state: "Karnataka",
+      pincode: "560038",
+      phone: "+91 98450 77112",
+      verificationStatus: "verified",
+      verificationNotes: "CDSCO and Karnataka State Drug Controller validated. Active Form 20B/21B retail license.",
+      certificateFileName: "Drug_License_MedPlus_Form20B_21B.pdf",
+      verifiedAt: new Date(Date.now() - 38 * 24 * 3600 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 40 * 24 * 3600 * 1000).toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ],
+]);
+
+export const deliveryPartnersStore = new Map<string, DeliveryPartnerDetails>([
+  [
+    "demo-delivery-001",
+    {
+      id: "deliv-001",
+      userId: "demo-delivery-001",
+      fullName: "Arun Kumar",
+      phone: "+91 97410 99882",
+      dateOfBirth: "1996-03-24",
+      gender: "male",
+      vehicleType: "motorcycle",
+      vehicleRegistrationNumber: "KA-05-EP-4912",
+      drivingLicenseNumber: "KA-0520150041289",
+      city: "Bengaluru",
+      operatingZone: "Indiranagar, Koramangala & Domlur",
+      verificationStatus: "verified",
+      verificationNotes: "Vehicle RC & Commercial driving license verified via Parivahan Sewa portal.",
+      vehicleRcFileName: "KA05EP4912_RC_Book_Insurance.pdf",
+      drivingLicenseFileName: "DL_Arun_Kumar_Valid2028.pdf",
+      verifiedAt: new Date(Date.now() - 19 * 24 * 3600 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - 20 * 24 * 3600 * 1000).toISOString(),
       updatedAt: new Date().toISOString(),
     },
   ],
@@ -457,6 +560,144 @@ export async function updateHealthProfessionalDetails(
   };
 
   healthProfDetailsStore.set(userId, updated);
+  return { success: true, details: updated };
+}
+
+export async function getPharmacistDetails(userId: string): Promise<PharmacistDetails | null> {
+  if (isLiveSupabaseConfigured()) {
+    try {
+      const supabase = await createServerSupabaseClient();
+      const { data } = await supabase
+        .from("pharmacy_profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      if (data) {
+        return {
+          id: data.id,
+          userId: data.user_id,
+          pharmacyName: data.pharmacy_name,
+          pharmacistName: data.pharmacist_name,
+          pharmacyType: data.pharmacy_type || "retail",
+          gstNumber: data.gst_number,
+          drugLicenseNumber: data.drug_license_number,
+          pharmacyCouncilRegNo: data.pharmacy_council_reg_no,
+          pharmacyAddress: data.pharmacy_address,
+          city: data.city,
+          state: data.state,
+          pincode: data.pincode,
+          phone: data.phone,
+          verificationStatus: data.verification_status,
+          verificationNotes: data.verification_notes,
+          certificateFileName: data.certificate_url,
+          verifiedAt: data.verified_at,
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
+        };
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return pharmacistsStore.get(userId) || null;
+}
+
+export async function updatePharmacistDetails(
+  userId: string,
+  details: Partial<PharmacistDetails>
+): Promise<{ success: boolean; details?: PharmacistDetails; error?: string }> {
+  const existing = await getPharmacistDetails(userId);
+  const updated: PharmacistDetails = {
+    id: existing?.id || `pharma_${Date.now()}`,
+    userId,
+    pharmacyName: details.pharmacyName || existing?.pharmacyName || "City Care Pharmacy",
+    pharmacistName: details.pharmacistName || existing?.pharmacistName || "Registered Pharmacist",
+    pharmacyType: details.pharmacyType || existing?.pharmacyType || "retail",
+    gstNumber: details.gstNumber || existing?.gstNumber || "",
+    drugLicenseNumber: details.drugLicenseNumber || existing?.drugLicenseNumber || "",
+    pharmacyCouncilRegNo: details.pharmacyCouncilRegNo || existing?.pharmacyCouncilRegNo || "",
+    pharmacyAddress: details.pharmacyAddress || existing?.pharmacyAddress || "",
+    city: details.city || existing?.city || "Bengaluru",
+    state: details.state || existing?.state || "Karnataka",
+    pincode: details.pincode || existing?.pincode || "560001",
+    phone: details.phone || existing?.phone || "",
+    verificationStatus: details.verificationStatus || existing?.verificationStatus || "pending",
+    verificationNotes: details.verificationNotes ?? existing?.verificationNotes,
+    certificateFileName: details.certificateFileName || existing?.certificateFileName,
+    verifiedAt: existing?.verifiedAt,
+    createdAt: existing?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  pharmacistsStore.set(userId, updated);
+  return { success: true, details: updated };
+}
+
+export async function getDeliveryPartnerDetails(userId: string): Promise<DeliveryPartnerDetails | null> {
+  if (isLiveSupabaseConfigured()) {
+    try {
+      const supabase = await createServerSupabaseClient();
+      const { data } = await supabase
+        .from("delivery_partner_profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      if (data) {
+        return {
+          id: data.id,
+          userId: data.user_id,
+          fullName: data.full_name,
+          phone: data.phone,
+          dateOfBirth: data.date_of_birth,
+          gender: data.gender,
+          vehicleType: data.vehicle_type,
+          vehicleRegistrationNumber: data.vehicle_registration_number,
+          drivingLicenseNumber: data.driving_license_number,
+          city: data.city,
+          operatingZone: data.operating_zone,
+          verificationStatus: data.verification_status,
+          verificationNotes: data.verification_notes,
+          vehicleRcFileName: data.vehicle_rc_url,
+          drivingLicenseFileName: data.driving_license_url,
+          verifiedAt: data.verified_at,
+          createdAt: data.created_at,
+          updatedAt: data.updated_at,
+        };
+      }
+    } catch {
+      // Fallback
+    }
+  }
+  return deliveryPartnersStore.get(userId) || null;
+}
+
+export async function updateDeliveryPartnerDetails(
+  userId: string,
+  details: Partial<DeliveryPartnerDetails>
+): Promise<{ success: boolean; details?: DeliveryPartnerDetails; error?: string }> {
+  const existing = await getDeliveryPartnerDetails(userId);
+  const updated: DeliveryPartnerDetails = {
+    id: existing?.id || `deliv_${Date.now()}`,
+    userId,
+    fullName: details.fullName || existing?.fullName || "Delivery Partner",
+    phone: details.phone || existing?.phone || "",
+    dateOfBirth: details.dateOfBirth || existing?.dateOfBirth,
+    gender: details.gender || existing?.gender,
+    vehicleType: details.vehicleType || existing?.vehicleType || "motorcycle",
+    vehicleRegistrationNumber: details.vehicleRegistrationNumber || existing?.vehicleRegistrationNumber || "",
+    drivingLicenseNumber: details.drivingLicenseNumber || existing?.drivingLicenseNumber || "",
+    city: details.city || existing?.city || "Bengaluru",
+    operatingZone: details.operatingZone || existing?.operatingZone || "Central Zone",
+    verificationStatus: details.verificationStatus || existing?.verificationStatus || "pending",
+    verificationNotes: details.verificationNotes ?? existing?.verificationNotes,
+    vehicleRcFileName: details.vehicleRcFileName || existing?.vehicleRcFileName,
+    drivingLicenseFileName: details.drivingLicenseFileName || existing?.drivingLicenseFileName,
+    verifiedAt: existing?.verifiedAt,
+    createdAt: existing?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  deliveryPartnersStore.set(userId, updated);
   return { success: true, details: updated };
 }
 

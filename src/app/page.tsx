@@ -1,8 +1,12 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { getCurrentUser } from "@/lib/auth-service";
-import { User, Stethoscope, ArrowRight, ShieldCheck, HeartHandshake } from "lucide-react";
+import LandingHero from "@/components/landing/LandingHero";
+import AssessSymptomsSection from "@/components/landing/AssessSymptomsSection";
+import ScheduleConsultationSection from "@/components/landing/ScheduleConsultationSection";
+import HelpUsDiagnoseSection from "@/components/landing/HelpUsDiagnoseSection";
+import Link from "next/link";
+import { Activity, ShieldCheck, HeartHandshake, Phone } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +18,10 @@ export default async function HomePage() {
       redirect("/patient/home");
     } else if (user.role === "health_professional") {
       redirect("/professional/home");
+    } else if (user.role === "pharmacist") {
+      redirect("/pharmacist/home");
+    } else if (user.role === "delivery_partner") {
+      redirect("/delivery/home");
     }
   }
 
@@ -21,66 +29,35 @@ export default async function HomePage() {
     <>
       <Navbar />
 
-      <main className="main-wrapper">
-        <section className="landing-hero">
-          <div className="landing-subheading">Digital Healthcare System</div>
-          <h1 className="landing-title">Choose your account type</h1>
-        </section>
+      <main className="landing-container">
+        {/* Hero Section */}
+        <LandingHero />
 
-        <section className="role-grid" aria-label="Account Type Selection">
-          {/* Option 1: Patient */}
-          <Link
-            href="/login?role=patient"
-            className="role-card"
-            id="role-card-patient"
-            aria-label="Continue as Patient"
-          >
-            <div className="role-icon-container">
-              <User size={34} strokeWidth={2} />
+        {/* Section 1: Assess Symptoms (Redirects to Patient Login/Register) */}
+        <AssessSymptomsSection />
+
+        {/* Section 2: Schedule a Consultation (Redirects to Patient Login/Register) */}
+        <ScheduleConsultationSection />
+
+        {/* Section 3: Help us Diagnose (Three Points & Redirects to Healthcare Registration) */}
+        <HelpUsDiagnoseSection />
+
+        {/* Minimal Footer */}
+        <footer style={{ width: "100%", maxWidth: "1100px", padding: "2.5rem 0 1rem", borderTop: "1px solid var(--border-subtle)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1.25rem", color: "var(--text-muted)", fontSize: "0.85rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <div style={{ width: "28px", height: "28px", borderRadius: "8px", background: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", color: "#ffffff" }}>
+              <Activity size={16} />
             </div>
+            <strong style={{ color: "var(--text-primary)" }}>Appie Digital Healthcare</strong>
+            <span>• © {new Date().getFullYear()} All rights reserved.</span>
+          </div>
 
-            <span className="role-tag">Individuals & Families</span>
-
-            <h2 className="role-card-title">Patient</h2>
-
-            <p className="role-card-desc">
-              Get routine, minor health concerns assessed digitally, consult verified medical professionals,
-              and receive prescribed medications at your doorstep.
-            </p>
-
-            <div className="role-action-link">
-              <span>Enter Patient Portal</span>
-              <ArrowRight size={18} strokeWidth={2.5} />
-            </div>
-          </Link>
-
-          {/* Option 2: Health Professional */}
-          <Link
-            href="/login?role=health_professional"
-            className="role-card"
-            id="role-card-professional"
-            aria-label="Continue as Health Professional"
-          >
-            <div className="role-icon-container">
-              <Stethoscope size={34} strokeWidth={2} />
-            </div>
-
-            <span className="role-tag">Doctors & Clinicians</span>
-
-            <h2 className="role-card-title">Health Professional</h2>
-
-            <p className="role-card-desc">
-              Access digital patient assessments, review symptom records, conduct appointments, and issue
-              verified e-prescriptions securely.
-            </p>
-
-            <div className="role-action-link">
-              <span>Enter Professional Portal</span>
-              <ArrowRight size={18} strokeWidth={2.5} />
-            </div>
-          </Link>
-        </section>
-
+          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
+            <Link href="/login" className="form-link" style={{ fontSize: "0.85rem" }}>Sign In</Link>
+            <Link href="/register?role=patient" className="form-link" style={{ fontSize: "0.85rem" }}>Patient Portal</Link>
+            <Link href="/healthcare-registration" className="form-link" style={{ fontSize: "0.85rem" }}>Partner Network</Link>
+          </div>
+        </footer>
       </main>
     </>
   );

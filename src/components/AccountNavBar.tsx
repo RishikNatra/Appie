@@ -4,8 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { User, HeartPulse, ShieldCheck, Settings, Award } from "lucide-react";
 
+import { UserRole } from "@/lib/types";
+
 interface AccountNavBarProps {
-  role?: "patient" | "health_professional";
+  role?: UserRole;
 }
 
 export default function AccountNavBar({ role }: AccountNavBarProps) {

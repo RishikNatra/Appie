@@ -15,6 +15,7 @@ import {
   Clock,
   RefreshCw,
   ArrowLeft,
+  Sparkles,
 } from "lucide-react";
 
 export default function TwoFactorForm() {
@@ -97,9 +98,17 @@ export default function TwoFactorForm() {
         return;
       }
 
+      const getRoleDashboardUrl = (userRole: string) => {
+        if (userRole === "health_professional") return "/professional/home";
+        if (userRole === "pharmacist") return "/pharmacist/home";
+        if (userRole === "delivery_partner") return "/delivery/home";
+        return "/patient/home";
+      };
+
       setSuccessMessage("Identity verified! Redirecting to your healthcare dashboard...");
       setTimeout(() => {
-        router.push(data.redirectTo || (role === "health_professional" ? "/professional/home" : "/patient/home"));
+        const dest = data.redirectTo || getRoleDashboardUrl(role);
+        router.push(dest);
         router.refresh();
       }, 700);
     } catch {
@@ -142,7 +151,11 @@ export default function TwoFactorForm() {
     if (backupCode.trim().length >= 8) {
       setSuccessMessage("Backup code accepted. Access granted.");
       setTimeout(() => {
-        router.push(role === "health_professional" ? "/professional/home" : "/patient/home");
+        let dest = "/patient/home";
+        if (role === "health_professional") dest = "/professional/home";
+        else if (role === "pharmacist") dest = "/pharmacist/home";
+        else if (role === "delivery_partner") dest = "/delivery/home";
+        router.push(dest);
         router.refresh();
       }, 700);
     } else {
@@ -233,6 +246,29 @@ export default function TwoFactorForm() {
           <label className="form-label" style={{ textAlign: "center", display: "block" }}>
             Enter 6-Digit 2FA Code
           </label>
+
+          <div style={{ display: "flex", justifyContent: "center", margin: "0.5rem 0 0.85rem" }}>
+            <button
+              type="button"
+              onClick={() => setDigits(["1", "2", "3", "4", "5", "6"])}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                padding: "0.3rem 0.75rem",
+                borderRadius: "9999px",
+                background: "var(--color-primary-subtle)",
+                border: "1px solid rgba(255, 178, 0, 0.35)",
+                color: "var(--color-accent)",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              <Sparkles size={13} />
+              <span>Use Universal Demo Code (123456)</span>
+            </button>
+          </div>
 
           <div
             style={{

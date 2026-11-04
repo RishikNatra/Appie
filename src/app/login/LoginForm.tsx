@@ -6,6 +6,8 @@ import Link from "next/link";
 import {
   User,
   Stethoscope,
+  Pill,
+  Truck,
   Lock,
   Mail,
   Eye,
@@ -15,18 +17,23 @@ import {
   CheckCircle2,
   Shield,
   Loader2,
-  Award,
+  Sparkles,
 } from "lucide-react";
+
+type RoleType = "patient" | "health_professional" | "pharmacist" | "delivery_partner";
 
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Determine role from query param (?role=health_professional or ?role=patient)
-  const roleParam = searchParams.get("role");
-  const isProfessional = roleParam === "health_professional";
-  const currentRole = isProfessional ? "health_professional" : "patient";
+  // Role from query (?role=health_professional | pharmacist | delivery_partner | patient)
+  const roleParam = searchParams.get("role") as RoleType | null;
+  const initialRole: RoleType =
+    roleParam === "health_professional" || roleParam === "pharmacist" || roleParam === "delivery_partner"
+      ? roleParam
+      : "patient";
 
+  const [selectedRole, setSelectedRole] = useState<RoleType>(initialRole);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,12 +43,32 @@ export default function LoginForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const handleRoleChange = (newRole: RoleType) => {
+    setSelectedRole(newRole);
+    setErrorMessage("");
+    setSuccessMessage("");
+  };
+
+  const handleQuickDemoFill = (role: RoleType) => {
+    setSelectedRole(role);
+    if (role === "patient") {
+      setIdentifier("patient@appie.health");
+    } else if (role === "health_professional") {
+      setIdentifier("doctor@appie.health");
+    } else if (role === "pharmacist") {
+      setIdentifier("pharmacist@appie.health");
+    } else if (role === "delivery_partner") {
+      setIdentifier("delivery@appie.health");
+    }
+    setPassword("Password123!");
+    setErrorMessage("");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
 
-    // Client-side quick validation
     if (!identifier.trim()) {
       setErrorMessage("Please enter your email address or username.");
       return;
@@ -57,11 +84,9 @@ export default function LoginForm() {
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          role: currentRole,
+          role: selectedRole,
           identifier: identifier.trim(),
           password,
           rememberMe,
@@ -86,14 +111,14 @@ export default function LoginForm() {
       if (data.requiresTwoFactor) {
         setSuccessMessage("Credentials authenticated. Two-Factor Authentication required.");
         setTimeout(() => {
-          router.push(data.redirectTo || `/login/2fa?identifier=${encodeURIComponent(identifier.trim())}&role=${currentRole}`);
+          router.push(data.redirectTo || `/login/2fa?identifier=${encodeURIComponent(identifier.trim())}&role=${selectedRole}`);
         }, 500);
         return;
       }
 
       setSuccessMessage("Login successful! Redirecting to your dashboard...");
       setTimeout(() => {
-        router.push(data.redirectTo || (isProfessional ? "/professional/home" : "/patient/home"));
+        router.push(data.redirectTo || (selectedRole === "patient" ? "/patient/home" : "/professional/home"));
         router.refresh();
       }, 700);
     } catch {
@@ -103,208 +128,249 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="auth-card">
-      <Link href="/" className="back-link" aria-label="Go back to role selection">
+    <div className="auth-card" style={{ maxWidth: "560px", width: "100%" }}>
+      <Link href="/" className="back-link" aria-label="Go back to Home">
         <ArrowLeft size={18} />
-        <span>Back to selection</span>
+        <span>Back to Home</span>
       </Link>
 
       <div className="auth-header">
         <div className="auth-role-badge">
-          {isProfessional ? (
-            <>
-              <Stethoscope size={16} color="var(--color-accent)" />
-              <span>Health Professional Portal</span>
-            </>
-          ) : (
+          {selectedRole === "patient" && (
             <>
               <User size={16} color="var(--color-accent)" />
               <span>Patient Portal</span>
             </>
           )}
+          {selectedRole === "health_professional" && (
+            <>
+              <Stethoscope size={16} color="var(--color-accent)" />
+              <span>Doctor Portal</span>
+            </>
+          )}
+          {selectedRole === "pharmacist" && (
+            <>
+              <Pill size={16} color="var(--color-accent)" />
+              <span>Pharmacy Network</span>
+            </>
+          )}
+          {selectedRole === "delivery_partner" && (
+            <>
+              <Truck size={16} color="var(--color-accent)" />
+              <span>Delivery Fleet</span>
+            </>
+          )}
         </div>
 
-        <h1 className="auth-title">
-          {isProfessional ? "Doctor Login" : "Patient Login"}
-        </h1>
-
+        <h1 className="auth-title">Sign In to Appie</h1>
         <p className="auth-subtitle">
-          {isProfessional
-            ? "Sign in to manage patient appointments & clinical assessments"
-            : "Sign in to access your routine health assessments & prescriptions"}
+          Access your digital assessments, clinical reviews, pharmacy inventory, or delivery routes securely.
         </p>
       </div>
 
-      {/* Professional Verification Status Component */}
-      {isProfessional && (
-        <div
-          style={{
-            marginBottom: "1.25rem",
-            padding: "0.75rem 1rem",
-            borderRadius: "12px",
-            backgroundColor: "var(--bg-surface)",
-            border: "1px solid var(--border-subtle)",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.6rem",
-            fontSize: "0.82rem",
-            color: "var(--text-secondary)",
-          }}
+      {/* Role Selection Tabs */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "0.35rem",
+          backgroundColor: "var(--bg-surface)",
+          padding: "0.35rem",
+          borderRadius: "14px",
+          border: "1px solid var(--border-subtle)",
+          marginBottom: "1.5rem",
+        }}
+        role="tablist"
+      >
+        <button
+          type="button"
+          className={`slot-btn ${selectedRole === "patient" ? "active" : ""}`}
+          onClick={() => handleRoleChange("patient")}
+          style={{ minHeight: "44px", fontSize: "0.8rem", borderRadius: "10px" }}
         >
-          <Award size={18} color="var(--color-accent)" style={{ flexShrink: 0 }} />
-          <span>
-            Medical Council credentials and license verification are required for clinical consultations.
-          </span>
+          <span>Patient</span>
+        </button>
+
+        <button
+          type="button"
+          className={`slot-btn ${selectedRole === "health_professional" ? "active" : ""}`}
+          onClick={() => handleRoleChange("health_professional")}
+          style={{ minHeight: "44px", fontSize: "0.8rem", borderRadius: "10px" }}
+        >
+          <span>Doctor</span>
+        </button>
+
+        <button
+          type="button"
+          className={`slot-btn ${selectedRole === "pharmacist" ? "active" : ""}`}
+          onClick={() => handleRoleChange("pharmacist")}
+          style={{ minHeight: "44px", fontSize: "0.8rem", borderRadius: "10px" }}
+        >
+          <span>Pharmacy</span>
+        </button>
+
+        <button
+          type="button"
+          className={`slot-btn ${selectedRole === "delivery_partner" ? "active" : ""}`}
+          onClick={() => handleRoleChange("delivery_partner")}
+          style={{ minHeight: "44px", fontSize: "0.8rem", borderRadius: "10px" }}
+        >
+          <span>Delivery</span>
+        </button>
+      </div>
+
+      {/* Quick Demo Credentials Pill Bar for Testing */}
+      <div style={{ marginBottom: "1.25rem", padding: "0.6rem 0.85rem", backgroundColor: "var(--color-primary-subtle)", borderRadius: "10px", border: "1px solid rgba(255, 178, 0, 0.25)", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: "var(--color-accent)", fontWeight: 700 }}>
+          <Sparkles size={14} />
+          <span>Demo 1-Click Fill:</span>
         </div>
-      )}
+        <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={() => handleQuickDemoFill("patient")}
+            style={{ fontSize: "0.74rem", padding: "0.2rem 0.55rem", borderRadius: "6px", background: "var(--bg-card)", border: "1px solid var(--border-medium)", color: "var(--text-primary)", cursor: "pointer" }}
+          >
+            Patient
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickDemoFill("health_professional")}
+            style={{ fontSize: "0.74rem", padding: "0.2rem 0.55rem", borderRadius: "6px", background: "var(--bg-card)", border: "1px solid var(--border-medium)", color: "var(--text-primary)", cursor: "pointer" }}
+          >
+            Doctor
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickDemoFill("pharmacist")}
+            style={{ fontSize: "0.74rem", padding: "0.2rem 0.55rem", borderRadius: "6px", background: "var(--bg-card)", border: "1px solid var(--border-medium)", color: "var(--text-primary)", cursor: "pointer" }}
+          >
+            Pharmacist
+          </button>
+          <button
+            type="button"
+            onClick={() => handleQuickDemoFill("delivery_partner")}
+            style={{ fontSize: "0.74rem", padding: "0.2rem 0.55rem", borderRadius: "6px", background: "var(--bg-card)", border: "1px solid var(--border-medium)", color: "var(--text-primary)", cursor: "pointer" }}
+          >
+            Delivery
+          </button>
+        </div>
+      </div>
 
       {errorMessage && (
-        <div className="alert-box alert-error" role="alert">
-          <AlertCircle size={18} className="alert-icon" />
+        <div className="form-alert error" role="alert">
+          <AlertCircle size={18} />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="alert-box alert-success" role="alert">
-          <CheckCircle2 size={18} className="alert-icon" />
+        <div className="form-alert success" role="status">
+          <CheckCircle2 size={18} />
           <span>{successMessage}</span>
         </div>
       )}
 
-      {/* Login Credentials Form */}
       <form onSubmit={handleSubmit} noValidate>
-        {/* Email / Username field */}
-        <div className="form-group">
-          <label htmlFor="identifier-input" className="form-label">
-            Email or Username
+        <div className="form-group" style={{ marginBottom: "1rem" }}>
+          <label className="form-label" htmlFor="login-identifier">
+            Email Address or Username
           </label>
-          <div className="input-wrapper">
-            <span className="input-leading-icon">
-              <Mail size={18} />
-            </span>
+          <div style={{ position: "relative" }}>
             <input
-              id="identifier-input"
+              id="login-identifier"
               type="text"
-              name="identifier"
-              autoComplete="username"
-              placeholder={isProfessional ? "doctor@appie.health or dr_sharma" : "patient@appie.health or demo_patient"}
+              className="form-input"
+              placeholder="e.g. name@appie.health or username"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
-              className="form-input"
               required
-              disabled={isLoading}
+              style={{ paddingLeft: "40px" }}
+            />
+            <Mail
+              size={18}
+              style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }}
             />
           </div>
         </div>
 
-        {/* Password field */}
-        <div className="form-group">
-          <label htmlFor="password-input" className="form-label">
-            Password
-          </label>
-          <div className="input-wrapper">
-            <span className="input-leading-icon">
-              <Lock size={18} />
-            </span>
+        <div className="form-group" style={{ marginBottom: "1.25rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+            <label className="form-label" htmlFor="login-password" style={{ marginBottom: 0 }}>
+              Password
+            </label>
+            <Link href="/forgot-password" className="form-link" style={{ fontSize: "0.82rem" }}>
+              Forgot password?
+            </Link>
+          </div>
+          <div style={{ position: "relative" }}>
             <input
-              id="password-input"
+              id="login-password"
               type={showPassword ? "text" : "password"}
-              name="password"
-              autoComplete="current-password"
+              className="form-input"
               placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="form-input"
               required
-              disabled={isLoading}
+              style={{ paddingLeft: "40px", paddingRight: "40px" }}
+            />
+            <Lock
+              size={18}
+              style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--text-muted)" }}
             />
             <button
               type="button"
-              className="input-trailing-btn"
               onClick={() => setShowPassword(!showPassword)}
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              tabIndex={-1}
+              style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer" }}
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
         </div>
 
-        {/* Remember Me Component & Password Recovery Link Component */}
-        <div className="form-options-row">
-          <label className="checkbox-label" htmlFor="remember-me-checkbox">
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.88rem", color: "var(--text-secondary)" }}>
             <input
-              id="remember-me-checkbox"
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              style={{ display: "none" }}
+              style={{ accentColor: "var(--color-accent)", width: "16px", height: "16px" }}
             />
-            <span className="custom-checkbox">
-              {rememberMe && <CheckCircle2 size={14} color="#000000" strokeWidth={3} />}
-            </span>
             <span>Remember me</span>
           </label>
-
-          <Link
-            href="/forgot-password"
-            className="form-link"
-            id="link-forgot-password"
-            style={{ fontSize: "0.85rem" }}
-          >
-            Forgot password?
-          </Link>
         </div>
 
-        {/* Login Action Component */}
         <button
           type="submit"
           className="btn-primary"
-          id="login-submit-btn"
+          style={{ width: "100%", minHeight: "52px", fontSize: "1rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem" }}
           disabled={isLoading}
         >
           {isLoading ? (
             <>
               <Loader2 size={18} className="animate-spin" />
-              <span>Verifying credentials...</span>
+              <span>Authenticating...</span>
             </>
           ) : (
-            <span>Log In</span>
+            <span>Sign In</span>
           )}
         </button>
       </form>
 
-      {/* Account Registration Prompt Component */}
-      <div style={{ textAlign: "center", marginTop: "1.75rem", fontSize: "0.92rem", color: "var(--text-secondary)" }}>
-        <span>Don&#39;t have an account? </span>
-        <Link
-          href={`/register?role=${currentRole}`}
-          className="form-link"
-          id="link-to-register"
-        >
-          Register as a new {isProfessional ? "health professional" : "patient"}
-        </Link>
-      </div>
-
-      {/* Switch role link */}
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "1rem",
-          paddingTop: "1rem",
-          borderTop: "1px solid var(--border-subtle)",
-          fontSize: "0.85rem",
-          color: "var(--text-muted)",
-        }}
-      >
-        <span>Not a {isProfessional ? "health professional" : "patient"}? </span>
-        <Link
-          href={`/login?role=${isProfessional ? "patient" : "health_professional"}`}
-          style={{ color: "var(--text-secondary)", fontWeight: 600, textDecoration: "underline" }}
-        >
-          Switch to {isProfessional ? "Patient Login" : "Doctor Login"}
-        </Link>
+      {/* Registration Prompt Link */}
+      <div style={{ textAlign: "center", marginTop: "1.75rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-subtle)" }}>
+        <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
+          Don&apos;t have an account yet?{" "}
+        </span>
+        {selectedRole === "patient" ? (
+          <Link href="/register?role=patient" className="form-link" style={{ fontWeight: 700, fontSize: "0.9rem" }}>
+            Register as Patient
+          </Link>
+        ) : (
+          <Link href="/healthcare-registration" className="form-link" style={{ fontWeight: 700, fontSize: "0.9rem" }}>
+            Register as Healthcare Partner
+          </Link>
+        )}
       </div>
     </div>
   );

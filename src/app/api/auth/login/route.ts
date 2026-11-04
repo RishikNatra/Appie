@@ -46,8 +46,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const redirectUrl =
-      result.user?.role === "patient" ? "/patient/home" : "/professional/home";
+    const role = result.user?.role || validation.data.role;
+    let redirectUrl = "/patient/home";
+    if (role === "health_professional") redirectUrl = "/professional/home";
+    else if (role === "pharmacist") redirectUrl = "/pharmacist/home";
+    else if (role === "delivery_partner") redirectUrl = "/delivery/home";
 
     return NextResponse.json({
       success: true,

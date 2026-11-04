@@ -205,20 +205,104 @@ export const professionalRegistrationSchema = z
   });
 
 /**
+ * Pharmacist Registration Schema
+ */
+export const pharmacistRegistrationSchema = z
+  .object({
+    role: z.literal("pharmacist"),
+    // Pharmacy Details
+    pharmacyName: z.string().min(2, "Pharmacy name is required").max(100),
+    pharmacistName: z.string().min(2, "Registered pharmacist name is required").max(100),
+    pharmacyType: z.enum(["retail", "hospital", "community", "chain"]).default("retail"),
+    gstNumber: z.string().min(5, "GST number is required").max(25),
+    // License Details
+    drugLicenseNumber: z.string().min(4, "Drug License Number (Form 20/21) is required").max(50),
+    pharmacyCouncilRegNo: z.string().min(3, "State Pharmacy Council Registration is required").max(50),
+    pharmacyAddress: z.string().min(5, "Physical pharmacy address is required").max(200),
+    city: z.string().min(2, "City is required").max(50),
+    state: z.string().min(2, "State is required").max(50),
+    pincode: z.string().min(5, "Pincode is required").max(10),
+    phone: z
+      .string()
+      .min(10, "Phone number must be at least 10 digits")
+      .max(15)
+      .regex(/^[0-9+ -]+$/, "Invalid phone number format"),
+    certificateFileName: z.string().optional(),
+    // Account Credentials
+    email: z.string().email("Invalid email address").max(100),
+    username: z
+      .string()
+      .min(3, "Username must be at least 3 characters")
+      .max(30, "Username must not exceed 30 characters")
+      .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+    password: passwordValidation,
+    confirmPassword: z.string(),
+    // Terms & Consent
+    termsConsent: z.boolean().refine((val) => val === true, {
+      message: "You must accept the Good Pharmacy Practice & Medicine Dispensing Guidelines",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+/**
+ * Delivery Partner Registration Schema
+ */
+export const deliveryPartnerRegistrationSchema = z
+  .object({
+    role: z.literal("delivery_partner"),
+    // Personal Details
+    fullName: z.string().min(2, "Full legal name is required").max(100),
+    phone: z
+      .string()
+      .min(10, "Phone number must be at least 10 digits")
+      .max(15)
+      .regex(/^[0-9+ -]+$/, "Invalid phone number format"),
+    dateOfBirth: z.string().optional(),
+    gender: z.string().optional(),
+    city: z.string().min(2, "Operating city is required").max(50),
+    operatingZone: z.string().min(2, "Preferred delivery zone is required").max(100),
+    // Vehicle & License Details
+    vehicleType: z.enum(["motorcycle", "scooter", "electric_vehicle", "bicycle"]).default("motorcycle"),
+    vehicleRegistrationNumber: z.string().min(4, "Vehicle Registration Certificate (RC) number is required").max(30),
+    drivingLicenseNumber: z.string().min(4, "Driving License number is required").max(30),
+    vehicleRcFileName: z.string().optional(),
+    // Account Credentials
+    email: z.string().email("Invalid email address").max(100),
+    username: z
+      .string()
+      .min(3, "Username must be at least 3 characters")
+      .max(30, "Username must not exceed 30 characters")
+      .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+    password: passwordValidation,
+    confirmPassword: z.string(),
+    // Terms & Consent
+    termsConsent: z.boolean().refine((val) => val === true, {
+      message: "You must agree to the Pharmaceutical Delivery & Safe Transit Guidelines",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+
+/**
  * Universal Registration Schema
  */
 export const registerSchema = z.union([
   patientRegistrationSchema,
   professionalRegistrationSchema,
+  pharmacistRegistrationSchema,
+  deliveryPartnerRegistrationSchema,
 ]);
 
 /**
  * User Login Schema
  */
 export const loginSchema = z.object({
-  role: z.enum(["patient", "health_professional"], {
-    message: "Role must be either Patient or Health Professional",
-  }),
+  role: z.enum(["patient", "health_professional", "pharmacist", "delivery_partner", "admin"]).optional(),
   identifier: z
     .string()
     .min(3, "Please enter your email or username")
@@ -548,5 +632,11 @@ export const careFollowUpUpdateSchema = z.object({
 
 export type PatientRegistrationInput = z.infer<typeof patientRegistrationSchema>;
 export type ProfessionalRegistrationInput = z.infer<typeof professionalRegistrationSchema>;
-export type RegisterInput = PatientRegistrationInput | ProfessionalRegistrationInput;
+export type PharmacistRegistrationInput = z.infer<typeof pharmacistRegistrationSchema>;
+export type DeliveryPartnerRegistrationInput = z.infer<typeof deliveryPartnerRegistrationSchema>;
+export type RegisterInput =
+  | PatientRegistrationInput
+  | ProfessionalRegistrationInput
+  | PharmacistRegistrationInput
+  | DeliveryPartnerRegistrationInput;
 export type LoginInput = z.infer<typeof loginSchema>;

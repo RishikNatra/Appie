@@ -3,7 +3,7 @@
  * Type definitions strictly adhering to the Product Hierarchy & Anatomy
  */
 
-export type UserRole = "patient" | "health_professional" | "admin";
+export type UserRole = "patient" | "health_professional" | "pharmacist" | "delivery_partner" | "admin";
 
 export interface UserProfile {
   id: string;
@@ -45,6 +45,49 @@ export interface HealthProfessionalDetails {
   verificationNotes?: string;
   licenseDocumentName?: string;
   idProofDocumentName?: string;
+  verifiedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PharmacistDetails {
+  id: string;
+  userId: string;
+  pharmacyName: string;
+  pharmacistName: string;
+  pharmacyType: "retail" | "hospital" | "community" | "chain";
+  gstNumber: string;
+  drugLicenseNumber: string; // Form 20 / Form 21
+  pharmacyCouncilRegNo: string;
+  pharmacyAddress: string;
+  city: string;
+  state: string;
+  pincode: string;
+  phone: string;
+  verificationStatus: "unverified" | "pending" | "verified" | "rejected";
+  verificationNotes?: string;
+  certificateFileName?: string;
+  verifiedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DeliveryPartnerDetails {
+  id: string;
+  userId: string;
+  fullName: string;
+  phone: string;
+  dateOfBirth?: string;
+  gender?: string;
+  vehicleType: "motorcycle" | "scooter" | "electric_vehicle" | "bicycle";
+  vehicleRegistrationNumber: string;
+  drivingLicenseNumber: string;
+  city: string;
+  operatingZone: string;
+  verificationStatus: "unverified" | "pending" | "verified" | "rejected";
+  verificationNotes?: string;
+  vehicleRcFileName?: string;
+  drivingLicenseFileName?: string;
   verifiedAt?: string;
   createdAt: string;
   updatedAt: string;

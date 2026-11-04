@@ -8,9 +8,25 @@ import { Activity, User, Stethoscope } from "lucide-react";
 export default async function Navbar() {
   const user = await getCurrentUser();
 
+  const getDashboardHref = () => {
+    if (!user) return "/";
+    if (user.role === "health_professional") return "/professional/home";
+    if (user.role === "pharmacist") return "/pharmacist/home";
+    if (user.role === "delivery_partner") return "/delivery/home";
+    return "/patient/home";
+  };
+
+  const getRoleLabel = () => {
+    if (!user) return "";
+    if (user.role === "health_professional") return "Doctor";
+    if (user.role === "pharmacist") return "Pharmacist";
+    if (user.role === "delivery_partner") return "Delivery";
+    return "Patient";
+  };
+
   return (
     <header className="app-header">
-      <Link href={user ? (user.role === "patient" ? "/patient/home" : "/professional/home") : "/"} className="brand-logo-wrap" title="Appie Healthcare">
+      <Link href={getDashboardHref()} className="brand-logo-wrap" title="Appie Healthcare">
         <div className="brand-icon-box">
           <Activity size={22} strokeWidth={2.5} />
         </div>
@@ -19,7 +35,7 @@ export default async function Navbar() {
         </div>
         {user && (
           <span className="brand-badge" style={{ marginLeft: "0.25rem" }}>
-            {user.role === "patient" ? "Patient" : "Doctor"}
+            {getRoleLabel()}
           </span>
         )}
       </Link>
@@ -49,6 +65,13 @@ export default async function Navbar() {
           </>
         ) : (
           <>
+            <Link
+              href="/healthcare-registration"
+              className="form-link"
+              style={{ minHeight: "48px", padding: "0 0.5rem", fontSize: "0.9rem", color: "var(--color-accent)" }}
+            >
+              Partner Network
+            </Link>
             <Link
               href="/login"
               className="form-link"
