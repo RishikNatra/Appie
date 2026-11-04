@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Shield,
   Loader2,
+  Award,
 } from "lucide-react";
 
 export default function LoginForm() {
@@ -81,6 +82,15 @@ export default function LoginForm() {
         return;
       }
 
+      // Check if 2FA is required
+      if (data.requiresTwoFactor) {
+        setSuccessMessage("Credentials authenticated. Two-Factor Authentication required.");
+        setTimeout(() => {
+          router.push(data.redirectTo || `/login/2fa?identifier=${encodeURIComponent(identifier.trim())}&role=${currentRole}`);
+        }, 500);
+        return;
+      }
+
       setSuccessMessage("Login successful! Redirecting to your dashboard...");
       setTimeout(() => {
         router.push(data.redirectTo || (isProfessional ? "/professional/home" : "/patient/home"));
@@ -125,6 +135,29 @@ export default function LoginForm() {
         </p>
       </div>
 
+      {/* Professional Verification Status Component */}
+      {isProfessional && (
+        <div
+          style={{
+            marginBottom: "1.25rem",
+            padding: "0.75rem 1rem",
+            borderRadius: "12px",
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid var(--border-subtle)",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            fontSize: "0.82rem",
+            color: "var(--text-secondary)",
+          }}
+        >
+          <Award size={18} color="var(--color-accent)" style={{ flexShrink: 0 }} />
+          <span>
+            Medical Council credentials and license verification are required for clinical consultations.
+          </span>
+        </div>
+      )}
+
       {errorMessage && (
         <div className="alert-box alert-error" role="alert">
           <AlertCircle size={18} className="alert-icon" />
@@ -139,6 +172,7 @@ export default function LoginForm() {
         </div>
       )}
 
+      {/* Login Credentials Form */}
       <form onSubmit={handleSubmit} noValidate>
         {/* Email / Username field */}
         <div className="form-group">
@@ -197,7 +231,7 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* Options Row */}
+        {/* Remember Me Component & Password Recovery Link Component */}
         <div className="form-options-row">
           <label className="checkbox-label" htmlFor="remember-me-checkbox">
             <input
@@ -213,12 +247,17 @@ export default function LoginForm() {
             <span>Remember me</span>
           </label>
 
-          <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>
-            Demo: Password123!
-          </span>
+          <Link
+            href="/forgot-password"
+            className="form-link"
+            id="link-forgot-password"
+            style={{ fontSize: "0.85rem" }}
+          >
+            Forgot password?
+          </Link>
         </div>
 
-        {/* Submit Button */}
+        {/* Login Action Component */}
         <button
           type="submit"
           className="btn-primary"
@@ -236,7 +275,7 @@ export default function LoginForm() {
         </button>
       </form>
 
-      {/* Switch to Register page */}
+      {/* Account Registration Prompt Component */}
       <div style={{ textAlign: "center", marginTop: "1.75rem", fontSize: "0.92rem", color: "var(--text-secondary)" }}>
         <span>Don&#39;t have an account? </span>
         <Link
@@ -267,7 +306,6 @@ export default function LoginForm() {
           Switch to {isProfessional ? "Patient Login" : "Doctor Login"}
         </Link>
       </div>
-
     </div>
   );
 }

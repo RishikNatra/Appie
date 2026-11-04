@@ -787,3 +787,340 @@ input[type="checkbox"]:checked + .custom-checkbox {
   color: var(--color-accent);
   background-color: var(--bg-card-hover);
 }
+
+/* ==============================================================================
+   ACCOUNT SYSTEM RICH UI ELEMENTS (48px Touch Targets, 250ms transitions)
+   ============================================================================== */
+
+/* Dropdown / Select Input */
+.form-select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  outline: none;
+  cursor: pointer;
+  transition: all 250ms ease-in-out;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239FA4B2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.1em;
+}
+
+.form-select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(255, 178, 0, 0.15);
+}
+
+/* Textarea Input */
+.form-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.85rem 1rem;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  transition: all 250ms ease-in-out;
+}
+
+.form-textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(255, 178, 0, 0.15);
+}
+
+/* Radio Button Group (48px Touch Targets) */
+.radio-group-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.radio-pill-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.5rem 1.15rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-subtle);
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: all 250ms ease-in-out;
+}
+
+.radio-pill-label.active {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+.radio-pill-label:hover:not(.active) {
+  border-color: var(--border-medium);
+  background-color: var(--bg-card-hover);
+}
+
+/* Toggle / Switch Control (48px Touch Target wrapper) */
+.switch-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  cursor: pointer;
+  min-height: 48px;
+  user-select: none;
+}
+
+.switch-track {
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  background-color: var(--border-medium);
+  position: relative;
+  transition: background-color 250ms ease-in-out;
+  flex-shrink: 0;
+}
+
+.switch-track.checked {
+  background-color: var(--color-accent);
+}
+
+.switch-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #EFEEEE;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: transform 250ms ease-in-out, background-color 250ms ease-in-out;
+}
+
+.switch-track.checked .switch-thumb {
+  transform: translateX(22px);
+  background-color: #000000;
+}
+
+/* Progress Indicator & Completeness Bar */
+.progress-container {
+  width: 100%;
+  background-color: var(--border-subtle);
+  border-radius: 9999px;
+  height: 8px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  transition: width 250ms ease-in-out;
+}
+
+/* Badges */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-verified {
+  background-color: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #22c55e;
+}
+
+.badge-pending {
+  background-color: rgba(255, 178, 0, 0.15);
+  border: 1px solid rgba(255, 178, 0, 0.4);
+  color: var(--color-accent);
+}
+
+.badge-rejected {
+  background-color: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+/* Section Header & Subtitle */
+.section-header-wrap {
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.section-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* Account Navigation Bar / Tabs (48px Touch Targets) */
+.account-nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.75rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-subtle);
+  width: 100%;
+}
+
+.account-nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.5rem 1.25rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all 250ms ease-in-out;
+}
+
+.account-nav-tab:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
+}
+
+.account-nav-tab.active {
+  color: var(--color-accent);
+  background-color: var(--color-accent-subtle);
+  border-color: rgba(255, 178, 0, 0.4);
+}
+
+/* Tags and Chips (for allergies, chronic conditions) */
+.chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.chip-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chip-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: color 250ms;
+}
+
+.chip-delete-btn:hover {
+  color: var(--color-error);
+}
+
+/* File Upload Zone (Touch target >= 48px) */
+.file-upload-zone {
+  border: 2px dashed var(--border-medium);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  background-color: var(--bg-surface);
+  cursor: pointer;
+  transition: all 250ms ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 140px;
+}
+
+.file-upload-zone:hover {
+  border-color: var(--color-accent);
+  background-color: var(--color-accent-subtle);
+}
+
+/* Step Progress Indicator (1 - 2 - 3) */
+.step-indicator-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.step-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.step-node.active {
+  color: var(--color-accent);
+}
+
+.step-node.completed {
+  color: var(--color-success);
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.step-connector {
+  flex: 1;
+  max-width: 60px;
+  height: 2px;
+  background-color: var(--border-subtle);
+  margin: 0 0.75rem;
+}
+
+.step-connector.completed {
+  background-color: var(--color-success);
+}
+

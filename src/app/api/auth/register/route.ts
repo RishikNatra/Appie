@@ -4,7 +4,7 @@ import { registerSchema, sanitizeString } from "@/lib/security";
 import { registerUser } from "@/lib/auth-service";
 
 export async function POST(req: NextRequest) {
-  // 1. Strict Rate Limiting on Register Endpoint
+  // 1. Strict Rate Limiting on Register Endpoint (5 requests / min)
   const rateLimitResult = await checkRateLimit(req, AUTH_RATE_LIMIT);
   if (!rateLimitResult.success) {
     return createRateLimitExceededResponse(rateLimitResult);
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // 2. Pre-parse sanity check on string fields
+    // 2. Pre-parse sanity check against SQL injection / XSS / Prompt Injection
     if (typeof body.email === "string") {
       const emailCheck = sanitizeString(body.email, { maxLen: 100 });
       if (!emailCheck.isValid) {
@@ -28,11 +28,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3. Server-side Zod Validation
+    // 3. Server-side Zod Schema Validation
     const validation = registerSchema.safeParse(body);
     if (!validation.success) {
       const firstError = validation.error.issues[0]?.message || "Validation failed";
-      return NextResponse.json({ error: firstError, details: validation.error.format() }, { status: 400 });
+      return NextResponse.json(
+        { error: firstError, details: validation.error.format() },
+        { status: 400 }
+      );
     }
 
     // 4. Register the user
@@ -41,12 +44,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error || "Registration failed" }, { status: 400 });
     }
 
-    const redirectUrl =
-      result.user?.role === "patient" ? "/patient/home" : "/professional/home";
+    // Redirect new user to registration verification screen
+    const redirectUrl = `/verify-registration?email=${encodeURIComponent(
+      validation.data.email
+    )}&role=${validation.data.role}`;
 
     return NextResponse.json({
       success: true,
-      message: "Registration successful",
+      message: "Registration successful. Please verify your contact details.",
       user: result.user,
       redirectTo: redirectUrl,
     });

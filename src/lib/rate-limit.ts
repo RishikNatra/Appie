@@ -153,6 +153,26 @@ export const AUTH_RATE_LIMIT: RateLimitConfig = {
 };
 
 /**
+ * Standard preset: OTP Verification endpoints
+ * Strict limit: 5 requests per 60 seconds
+ */
+export const VERIFY_RATE_LIMIT: RateLimitConfig = {
+  maxRequests: 5,
+  windowMs: 60 * 1000,
+  prefix: "appie_verify",
+};
+
+/**
+ * Standard preset: Resend Code endpoints
+ * Very strict limit: 3 requests per 60 seconds
+ */
+export const RESEND_RATE_LIMIT: RateLimitConfig = {
+  maxRequests: 3,
+  windowMs: 60 * 1000,
+  prefix: "appie_resend",
+};
+
+/**
  * Standard preset: Public API endpoints
  * 30 requests per 60 seconds
  */
@@ -183,3 +203,42 @@ export function createRateLimitExceededResponse(result: RateLimitResult): NextRe
     }
   );
 }
+
+/**
+ * Universal rate limit helper supporting key-based sliding windows
+ */
+export async function rateLimit(
+  key: string,
+  maxRequests: number = 60,
+  windowSeconds: number = 60
+): Promise<{ success: boolean; limit: number; remaining: number; resetSeconds: number }> {
+  const windowMs = windowSeconds * 1000;
+  const now = Date.now();
+  const windowStart = now - windowMs;
+
+  let record = memoryStore.get(key);
+  if (!record) {
+    record = { timestamps: [] };
+    memoryStore.set(key, record);
+  }
+
+  record.timestamps = record.timestamps.filter((ts) => ts > windowStart);
+
+  if (record.timestamps.length >= maxRequests) {
+    return {
+      success: false,
+      limit: maxRequests,
+      remaining: 0,
+      resetSeconds: windowSeconds,
+    };
+  }
+
+  record.timestamps.push(now);
+  return {
+    success: true,
+    limit: maxRequests,
+    remaining: maxRequests - record.timestamps.length,
+    resetSeconds: windowSeconds,
+  };
+}
+

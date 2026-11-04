@@ -4,7 +4,7 @@ import { loginSchema, sanitizeString } from "@/lib/security";
 import { loginUser } from "@/lib/auth-service";
 
 export async function POST(req: NextRequest) {
-  // 1. Strict Rate Limiting on Login Endpoint (prevents brute force)
+  // 1. Strict Rate Limiting on Login Endpoint (5 requests / min)
   const rateLimitResult = await checkRateLimit(req, AUTH_RATE_LIMIT);
   if (!rateLimitResult.success) {
     return createRateLimitExceededResponse(rateLimitResult);
@@ -32,6 +32,18 @@ export async function POST(req: NextRequest) {
     const result = await loginUser(validation.data);
     if (!result.success) {
       return NextResponse.json({ error: result.error || "Authentication failed" }, { status: 401 });
+    }
+
+    // 5. If 2FA is required, redirect to 2FA screen
+    if (result.requiresTwoFactor) {
+      return NextResponse.json({
+        success: true,
+        requiresTwoFactor: true,
+        identifier: validation.data.identifier,
+        redirectTo: `/login/2fa?identifier=${encodeURIComponent(
+          validation.data.identifier
+        )}&role=${validation.data.role}`,
+      });
     }
 
     const redirectUrl =

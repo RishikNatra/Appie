@@ -1,6 +1,13 @@
 import { cookies } from "next/headers";
 import { RegisterInput, LoginInput, sanitizeEmail, sanitizeUsername } from "./security";
 import { createServerSupabaseClient } from "./supabase/server";
+import {
+  generateVerificationCode,
+  verifyCode,
+  updateUserProfile,
+  updateHealthProfessionalDetails,
+  getUserProfile,
+} from "./account-service";
 
 export interface AuthUser {
   id: string;
@@ -12,8 +19,7 @@ export interface AuthUser {
 }
 
 // In-memory registered user repository for fallback demo/local development
-// when Supabase cloud is not yet connected with live credentials.
-const demoUsers: Map<string, { user: AuthUser; passwordHash: string }> = new Map([
+export const demoUsers: Map<string, { user: AuthUser; passwordHash: string }> = new Map([
   [
     "patient@appie.health",
     {
@@ -36,7 +42,7 @@ const demoUsers: Map<string, { user: AuthUser; passwordHash: string }> = new Map
         email: "doctor@appie.health",
         username: "dr_sharma",
         role: "health_professional",
-        fullName: "Dr. Ananya Sharma, MD",
+        fullName: "Dr. Ananya Sharma",
         isVerified: true,
       },
       passwordHash: "Password123!",
@@ -64,6 +70,7 @@ export async function registerUser(input: RegisterInput): Promise<{
   success: boolean;
   user?: AuthUser;
   error?: string;
+  requiresVerification?: boolean;
 }> {
   const cleanEmail = sanitizeEmail(input.email);
   const cleanUsername = sanitizeUsername(input.username);
@@ -72,6 +79,11 @@ export async function registerUser(input: RegisterInput): Promise<{
   if (isLiveSupabaseConfigured()) {
     try {
       const supabase = await createServerSupabaseClient();
+      const fullName =
+        input.role === "patient"
+          ? `${input.firstName} ${input.lastName}`.trim()
+          : input.fullName;
+
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
         password: input.password,
@@ -79,6 +91,7 @@ export async function registerUser(input: RegisterInput): Promise<{
           data: {
             username: cleanUsername,
             role: input.role,
+            full_name: fullName,
           },
         },
       });
@@ -93,13 +106,14 @@ export async function registerUser(input: RegisterInput): Promise<{
           email: cleanEmail,
           username: cleanUsername,
           role: input.role,
+          fullName,
+          isVerified: input.role === "patient",
         };
         await setSessionCookie(authUser);
         return { success: true, user: authUser };
       }
     } catch (err: unknown) {
       console.error("Supabase registration error:", err);
-      // Fall through to resilient local handler if Supabase fails
     }
   }
 
@@ -115,12 +129,18 @@ export async function registerUser(input: RegisterInput): Promise<{
     }
   }
 
+  const userId = `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+  const fullName =
+    input.role === "patient"
+      ? `${input.firstName} ${input.lastName}`.trim()
+      : input.fullName;
+
   const newUser: AuthUser = {
-    id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    id: userId,
     email: cleanEmail,
     username: cleanUsername,
     role: input.role,
-    fullName: cleanUsername,
+    fullName,
     isVerified: input.role === "patient",
   };
 
@@ -129,17 +149,72 @@ export async function registerUser(input: RegisterInput): Promise<{
     passwordHash: input.password,
   });
 
+  // Populate detailed user profile
+  if (input.role === "patient") {
+    await updateUserProfile(userId, {
+      id: userId,
+      role: "patient",
+      email: cleanEmail,
+      username: cleanUsername,
+      fullName,
+      firstName: input.firstName,
+      lastName: input.lastName,
+      phone: input.phone,
+      dateOfBirth: input.dateOfBirth,
+      gender: input.gender,
+      addressLine1: input.addressLine1 || "",
+      city: input.city || "",
+      state: input.state || "",
+      pincode: input.pincode || "",
+      emergencyContactName: input.emergencyContactName || "",
+      emergencyContactPhone: input.emergencyContactPhone || "",
+      emergencyContactRelation: input.emergencyContactRelation || "",
+      isVerified: true,
+      twoFactorEnabled: false,
+    });
+  } else {
+    await updateUserProfile(userId, {
+      id: userId,
+      role: "health_professional",
+      email: cleanEmail,
+      username: cleanUsername,
+      fullName: `${input.prefix} ${input.fullName}`,
+      phone: input.phone,
+      dateOfBirth: input.dateOfBirth,
+      gender: input.gender,
+      addressLine1: input.clinicAddress,
+      isVerified: false,
+      twoFactorEnabled: false,
+    });
+
+    await updateHealthProfessionalDetails(userId, {
+      userId,
+      prefix: input.prefix,
+      medicalLicenseNumber: input.medicalLicenseNumber,
+      medicalCouncilName: input.medicalCouncilName,
+      specialization: input.specialization,
+      qualifications: input.qualifications,
+      yearsOfExperience: input.yearsOfExperience,
+      clinicAddress: input.clinicAddress,
+      verificationStatus: "pending",
+    });
+  }
+
+  // Generate initial registration verification code
+  generateVerificationCode(cleanEmail, "registration");
+
   await setSessionCookie(newUser);
-  return { success: true, user: newUser };
+  return { success: true, user: newUser, requiresVerification: true };
 }
 
 /**
- * Server-side User Login with role enforcement
+ * Server-side User Login with role enforcement & 2FA check
  */
 export async function loginUser(input: LoginInput): Promise<{
   success: boolean;
   user?: AuthUser;
   error?: string;
+  requiresTwoFactor?: boolean;
 }> {
   const identifier = input.identifier.trim().toLowerCase();
 
@@ -157,7 +232,6 @@ export async function loginUser(input: LoginInput): Promise<{
       }
 
       if (data.user) {
-        // Query profile to enforce role
         const { data: profile } = await supabase
           .from("profiles")
           .select("*")
@@ -168,18 +242,26 @@ export async function loginUser(input: LoginInput): Promise<{
           await supabase.auth.signOut();
           return {
             success: false,
-            error: `This account is registered as a ${profile.role === "patient" ? "Patient" : "Health Professional"}. Please log in through the corresponding portal.`,
+            error: `This account is registered as a ${
+              profile.role === "patient" ? "Patient" : "Health Professional"
+            }. Please log in through the corresponding portal.`,
           };
         }
 
         const authUser: AuthUser = {
           id: data.user.id,
           email: data.user.email || identifier,
-          username: profile?.username || data.user.user_metadata?.username || identifier.split("@")[0],
+          username:
+            profile?.username || data.user.user_metadata?.username || identifier.split("@")[0],
           role: (profile?.role as "patient" | "health_professional") || input.role,
           fullName: profile?.full_name,
           isVerified: profile?.is_verified,
         };
+
+        if (profile?.two_factor_enabled) {
+          generateVerificationCode(authUser.email, "two_factor");
+          return { success: true, user: authUser, requiresTwoFactor: true };
+        }
 
         await setSessionCookie(authUser);
         return { success: true, user: authUser };
@@ -203,23 +285,132 @@ export async function loginUser(input: LoginInput): Promise<{
   }
 
   if (!matchedEntry) {
-    return { success: false, error: "Invalid credentials. Please verify your email/username and password." };
+    return {
+      success: false,
+      error: "Invalid credentials. Please verify your email/username and password.",
+    };
   }
 
   if (matchedEntry.passwordHash !== input.password) {
-    return { success: false, error: "Invalid credentials. Please verify your email/username and password." };
+    return {
+      success: false,
+      error: "Invalid credentials. Please verify your email/username and password.",
+    };
   }
 
   // Enforce role consistency
   if (matchedEntry.user.role !== input.role) {
     return {
       success: false,
-      error: `This account is registered as a ${matchedEntry.user.role === "patient" ? "Patient" : "Health Professional"}. Please switch to the ${matchedEntry.user.role === "patient" ? "Patient" : "Health Professional"} portal.`,
+      error: `This account is registered as a ${
+        matchedEntry.user.role === "patient" ? "Patient" : "Health Professional"
+      }. Please switch to the ${
+        matchedEntry.user.role === "patient" ? "Patient" : "Health Professional"
+      } portal.`,
+    };
+  }
+
+  // Check 2FA preference from profile
+  const profile = await getUserProfile(matchedEntry.user.id);
+  if (profile?.twoFactorEnabled) {
+    generateVerificationCode(matchedEntry.user.email, "two_factor");
+    return {
+      success: true,
+      user: matchedEntry.user,
+      requiresTwoFactor: true,
     };
   }
 
   await setSessionCookie(matchedEntry.user);
   return { success: true, user: matchedEntry.user };
+}
+
+/**
+ * Validates 2FA code and establishes authenticated session
+ */
+export async function completeTwoFactorLogin(
+  identifier: string,
+  code: string
+): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
+  const isValid = verifyCode(identifier, "two_factor", code);
+  if (!isValid) {
+    return { success: false, error: "Invalid or expired 2FA code. Please check and retry." };
+  }
+
+  for (const [email, entry] of demoUsers.entries()) {
+    if (
+      email.toLowerCase() === identifier.toLowerCase() ||
+      entry.user.username.toLowerCase() === identifier.toLowerCase()
+    ) {
+      await setSessionCookie(entry.user);
+      return { success: true, user: entry.user };
+    }
+  }
+
+  return { success: false, error: "User account session expired. Please sign in again." };
+}
+
+/**
+ * Initiates password recovery
+ */
+export async function initiatePasswordRecovery(
+  identifier: string,
+  method: "email" | "sms"
+): Promise<{ success: boolean; message: string; maskedTarget: string }> {
+  const cleanId = identifier.trim().toLowerCase();
+  let targetEmail = cleanId;
+
+  for (const [email, entry] of demoUsers.entries()) {
+    if (email.toLowerCase() === cleanId || entry.user.username.toLowerCase() === cleanId) {
+      targetEmail = email;
+      break;
+    }
+  }
+
+  generateVerificationCode(targetEmail, "password_recovery");
+
+  const masked =
+    method === "email"
+      ? targetEmail.replace(/(.{2})(.*)(@.*)/, "$1***$3")
+      : "+91 ••••• •••10";
+
+  return {
+    success: true,
+    message: `A 6-digit recovery code has been sent via ${method.toUpperCase()} to ${masked}.`,
+    maskedTarget: masked,
+  };
+}
+
+/**
+ * Resets user password
+ */
+export async function resetPasswordWithCode(
+  identifier: string,
+  code: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  const cleanId = identifier.trim().toLowerCase();
+  let matchedEmail = cleanId;
+  let matchedEntry: { user: AuthUser; passwordHash: string } | undefined;
+
+  for (const [email, entry] of demoUsers.entries()) {
+    if (email.toLowerCase() === cleanId || entry.user.username.toLowerCase() === cleanId) {
+      matchedEmail = email;
+      matchedEntry = entry;
+      break;
+    }
+  }
+
+  const isCodeValid = verifyCode(matchedEmail, "password_recovery", code);
+  if (!isCodeValid) {
+    return { success: false, error: "Invalid or expired recovery code." };
+  }
+
+  if (matchedEntry) {
+    matchedEntry.passwordHash = newPassword;
+  }
+
+  return { success: true };
 }
 
 /**
