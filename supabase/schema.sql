@@ -1002,3 +1002,75 @@ CREATE TRIGGER set_records_updated_at BEFORE UPDATE ON public.medical_records FO
 
 DROP TRIGGER IF EXISTS set_follow_ups_updated_at ON public.care_follow_ups;
 CREATE TRIGGER set_follow_ups_updated_at BEFORE UPDATE ON public.care_follow_ups FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- ------------------------------------------------------------------------------
+-- 23. AUTOMATIC PROFILE & SETTINGS CREATION TRIGGER ON auth.users
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, email, username, full_name, role, is_verified)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)),
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    COALESCE((NEW.raw_user_meta_data->>'role')::user_role, 'patient'::user_role),
+    CASE WHEN (NEW.raw_user_meta_data->>'role') = 'patient' THEN true ELSE false END
+  )
+  ON CONFLICT (id) DO NOTHING;
+
+  -- Automatically initialize default user settings
+  INSERT INTO public.user_settings (
+    user_id,
+    sms_notifications,
+    email_notifications,
+    whatsapp_notifications,
+    theme,
+    font_scaling,
+    language,
+    two_factor_enabled
+  )
+  VALUES (
+    NEW.id,
+    true,
+    true,
+    false,
+    'dark',
+    'normal',
+    'English',
+    false
+  )
+  ON CONFLICT (user_id) DO NOTHING;
+
+  -- Automatically initialize mandatory default consents
+  INSERT INTO public.user_consents (user_id, category, granted, version)
+  VALUES
+    (NEW.id, 'data_processing', true, '1.0'),
+    (NEW.id, 'telehealth_consultation', true, '1.0'),
+    (NEW.id, 'pharmacy_sharing', true, '1.0')
+  ON CONFLICT DO NOTHING;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ------------------------------------------------------------------------------
+-- 24. SEED DATA FOR MEDICATIONS
+-- ------------------------------------------------------------------------------
+INSERT INTO public.medications (name, generic_name, brand_name, category, dosage_form, strength, pack_size, price, prescription_required, usage_instructions, safety_warnings, side_effects, in_stock, manufacturer)
+VALUES
+  ('Dolo 650 (Paracetamol)', 'Paracetamol 650mg', 'Micro Labs', 'fever_pain', 'Tablet', '650 mg', 'Strip of 15 tablets', 32.50, false, 'Take 1 tablet every 6-8 hours after food as needed for fever or mild pain. Maximum 4 tablets in 24 hours.', 'Do not exceed maximum daily limit of 4000mg. Avoid alcohol consumption while on paracetamol.', ARRAY['Mild nausea', 'Rash (rare)', 'Sweating'], true, 'Micro Labs Ltd'),
+  ('Combiflam', 'Ibuprofen 400mg + Paracetamol 325mg', 'Sanofi India', 'fever_pain', 'Tablet', '400mg / 325mg', 'Strip of 20 tablets', 48.00, false, 'Take 1 tablet twice daily with food or milk to prevent gastric irritation.', 'Not recommended for patients with peptic ulcer disease or severe renal impairment.', ARRAY['Heartburn', 'Stomach upset', 'Dizziness'], true, 'Sanofi Consumer Healthcare'),
+  ('Ultracet', 'Tramadol Hydrochloride 37.5mg + Paracetamol 325mg', 'Johnson & Johnson', 'fever_pain', 'Tablet', '37.5mg / 325mg', 'Strip of 10 tablets', 195.00, true, 'Take 1 tablet every 8 hours as prescribed by physician for moderate to severe acute pain.', 'Schedule H prescription drug. Can cause drowsiness and physical dependence.', ARRAY['Drowsiness', 'Constipation', 'Nausea', 'Headache'], true, 'Janssen Pharmaceuticals'),
+  ('Cetzine 10', 'Cetirizine Hydrochloride 10mg', 'Dr. Reddy''s', 'cold_cough', 'Tablet', '10 mg', 'Strip of 10 tablets', 42.00, false, 'Take 1 tablet once daily at bedtime for relief from allergic rhinitis and runny nose.', 'May cause mild drowsiness. Avoid driving or operating heavy machinery.', ARRAY['Dry mouth', 'Mild somnolence', 'Fatigue'], true, 'Dr. Reddy''s Laboratories'),
+  ('Ascoril-D Plus Syrup', 'Dextromethorphan + Phenylephrine + Chlorpheniramine', 'Glenmark', 'cold_cough', 'Syrup', '100 ml bottle', '100 ml bottle', 135.00, false, 'Take 10ml (2 teaspoons) three times daily for dry, irritating cough.', 'Not suitable for productive cough with excessive phlegm.', ARRAY['Mild dizziness', 'Nausea', 'Restlessness'], true, 'Glenmark Pharmaceuticals'),
+  ('Augmentin 625 Duo', 'Amoxicillin 500mg + Potassium Clavulanate 125mg', 'GSK', 'antibiotics', 'Tablet', '625 mg', 'Strip of 10 tablets', 223.50, true, 'Take 1 tablet twice daily with meals for complete prescribed duration (usually 5 to 7 days).', 'Schedule H1 prescription medicine. Complete full prescribed course to prevent antimicrobial resistance.', ARRAY['Diarrhea', 'Mild nausea', 'Vomiting'], true, 'GlaxoSmithKline Pharmaceuticals'),
+  ('Pan 40', 'Pantoprazole Sodium 40mg', 'Alkem', 'digestion', 'Tablet', '40 mg', 'Strip of 15 tablets', 155.00, false, 'Take 1 tablet once daily in the morning, 30-45 minutes before breakfast.', 'Long-term continuous use without doctor consultation may reduce vitamin B12 absorption.', ARRAY['Headache', 'Flatulence', 'Abdominal pain'], true, 'Alkem Laboratories'),
+  ('Gelusil MPS Liquid', 'Aluminium Hydroxide + Magnesium Hydroxide + Simethicone', 'Pfizer India', 'digestion', 'Syrup', '200 ml bottle', '200 ml bottle', 142.00, false, 'Take 10-20ml (2-4 teaspoons) after meals and at bedtime for acidity and heartburn.', 'Maintain a 2-hour interval between antacids and other prescription medications.', ARRAY['Chalky taste', 'Mild laxative effect'], true, 'Pfizer Consumer Healthcare')
+ON CONFLICT DO NOTHING;

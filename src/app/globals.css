@@ -1712,3 +1712,63 @@ input[type="checkbox"]:checked + .custom-checkbox {
   -webkit-backdrop-filter: blur(6px);
   z-index: 5;
 }
+
+/* ==========================================================================
+   DISPLAY & ACCESSIBILITY DYNAMIC SETTINGS CLASSES
+   ========================================================================== */
+
+/* 1. Disabled Glow Setting */
+html.glow-disabled,
+:root.glow-disabled,
+body.glow-disabled {
+  --accent-glow: transparent !important;
+  --shadow-glow: none !important;
+}
+.glow-disabled .dashboard-card,
+.glow-disabled .linear-card,
+.glow-disabled .preview-card,
+.glow-disabled .modal-box,
+.glow-disabled .bg-ambient-glow {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+}
+.glow-disabled .bg-ambient-glow {
+  opacity: 0 !important;
+  display: none !important;
+}
+
+/* 2. High Contrast Setting */
+html.high-contrast,
+:root.high-contrast,
+body.high-contrast {
+  --border-subtle: #4b5563 !important;
+  --border-medium: #9ca3af !important;
+  --text-muted: #d1d5db !important;
+  --text-secondary: #e5e7eb !important;
+}
+[data-theme="light"].high-contrast,
+[data-theme="light"] body.high-contrast {
+  --border-subtle: #374151 !important;
+  --border-medium: #111827 !important;
+  --text-muted: #374151 !important;
+  --text-secondary: #1f2937 !important;
+}
+.high-contrast .dashboard-card,
+.high-contrast .linear-card,
+.high-contrast .form-input,
+.high-contrast .btn-secondary,
+.high-contrast .app-header {
+  border-width: 1.5px !important;
+}
+
+/* 3. Reduced Motion Setting */
+html.reduced-motion,
+html.reduced-motion *,
+:root.reduced-motion,
+:root.reduced-motion *,
+body.reduced-motion,
+body.reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}

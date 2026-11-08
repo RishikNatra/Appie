@@ -19,6 +19,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { HealthAssessmentRecord, ConsultationAppointment } from "@/lib/types";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export default function RecordsPage() {
   const [assessments, setAssessments] = useState<HealthAssessmentRecord[]>([]);
@@ -120,8 +121,9 @@ export default function RecordsPage() {
           </nav>
         </div>
 
-        {/* 8. Settings icon at extreme right */}
+        {/* 8. Constant Notification & Settings icon at extreme right */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+          <NotificationBell />
           <Link
             href="/account/settings"
             aria-label="Settings"

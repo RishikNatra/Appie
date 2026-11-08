@@ -852,6 +852,41 @@ export async function updateConsents(
 // ------------------------------------------------------------------------------
 
 export async function getUserSettings(userId: string): Promise<UserSettings> {
+  if (isLiveSupabaseConfigured()) {
+    try {
+      const supabase = await createServerSupabaseClient();
+      const { data } = await supabase
+        .from("user_settings")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      if (data) {
+        return {
+          userId: data.user_id,
+          smsNotifications: data.sms_notifications ?? true,
+          emailNotifications: data.email_notifications ?? true,
+          whatsappNotifications: data.whatsapp_notifications ?? false,
+          theme: data.theme || "dark",
+          language: data.language || "English",
+          fontScaling: data.font_scaling || "normal",
+          twoFactorEnabled: data.two_factor_enabled ?? false,
+          activeSessions: [
+            {
+              id: `sess-${Date.now()}`,
+              device: "Current Device Browser",
+              browser: "Chrome/Safari",
+              ipAddress: "127.0.0.1",
+              lastActive: "Active Now",
+              isCurrent: true,
+            },
+          ],
+        };
+      }
+    } catch (e) {
+      console.warn("Could not fetch user settings from Supabase, using local fallback", e);
+    }
+  }
+
   const existing = userSettingsStore.get(userId);
   if (existing) return existing;
 
@@ -860,10 +895,21 @@ export async function getUserSettings(userId: string): Promise<UserSettings> {
     smsNotifications: true,
     emailNotifications: true,
     whatsappNotifications: false,
+    orderAlerts: true,
+    consultationReminders: true,
     theme: "dark",
-    language: "en",
+    accentGlow: true,
+    smoothAnimations: true,
+    language: "English",
     fontScaling: "normal",
+    highContrast: false,
+    reducedMotion: false,
+    preferredConsultationType: "video",
+    defaultCity: "Bengaluru",
     twoFactorEnabled: false,
+    telehealthConsent: true,
+    pharmacyDataSharing: true,
+    healthDataConsent: true,
     activeSessions: [
       {
         id: `sess-${Date.now()}`,
@@ -890,6 +936,26 @@ export async function updateUserSettings(
     ...updates,
   };
   userSettingsStore.set(userId, updated);
+
+  if (isLiveSupabaseConfigured()) {
+    try {
+      const supabase = await createServerSupabaseClient();
+      await supabase.from("user_settings").upsert({
+        user_id: userId,
+        sms_notifications: updated.smsNotifications,
+        email_notifications: updated.emailNotifications,
+        whatsapp_notifications: updated.whatsappNotifications,
+        theme: updated.theme,
+        font_scaling: updated.fontScaling === "x-large" ? "large" : updated.fontScaling,
+        language: updated.language,
+        two_factor_enabled: updated.twoFactorEnabled,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.warn("Could not save settings to Supabase:", e);
+    }
+  }
+
   return { success: true, settings: updated };
 }
 

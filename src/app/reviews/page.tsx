@@ -7,9 +7,8 @@ import ClinicianReviewQueueComponent from "@/components/review/ClinicianReviewQu
 import DoctorIssuePrescriptionModal from "@/components/prescription/DoctorIssuePrescriptionModal";
 import PrescriptionViewerModal from "@/components/prescription/PrescriptionViewerModal";
 import NotificationBell from "@/components/notifications/NotificationBell";
-import ThemeToggle from "@/components/ThemeToggle";
 import SignOutButton from "@/components/SignOutButton";
-import { Activity } from "lucide-react";
+import { Activity, Settings } from "lucide-react";
 import { PrescriptionRecord } from "@/lib/types";
 
 export default function ReviewsPage() {
@@ -39,10 +38,28 @@ export default function ReviewsPage() {
           <span className="brand-badge">Clinical Review System</span>
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
           <NotificationBell />
-          <ThemeToggle />
           <SignOutButton />
+          <Link
+            href="/account/settings"
+            aria-label="Settings"
+            title="Account & System Settings"
+            style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "10px",
+              border: "1px solid var(--border-subtle)",
+              background: "var(--bg-card)",
+              color: "var(--text-primary)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textDecoration: "none",
+            }}
+          >
+            <Settings size={19} />
+          </Link>
         </div>
       </header>
 

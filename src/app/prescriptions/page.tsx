@@ -6,6 +6,7 @@ import { PrescriptionRecord } from "@/lib/types";
 import PrescriptionListComponent from "@/components/prescription/PrescriptionListComponent";
 import PrescriptionViewerModal from "@/components/prescription/PrescriptionViewerModal";
 import DoctorIssuePrescriptionModal from "@/components/prescription/DoctorIssuePrescriptionModal";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import { Activity, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -97,8 +98,9 @@ export default function PrescriptionsPage() {
           )}
         </div>
 
-        {/* 8. Settings icon at extreme right */}
+        {/* 8. Constant Notification & Settings icon at extreme right */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+          <NotificationBell />
           <Link
             href="/account/settings"
             aria-label="Settings"

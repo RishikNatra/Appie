@@ -25,8 +25,24 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const saved = localStorage.getItem('appie_theme') || 'dark';
-                document.documentElement.setAttribute('data-theme', saved);
+                var theme = localStorage.getItem('appie_theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', theme);
+
+                if (localStorage.getItem('appie_accent_glow') === 'false') {
+                  document.documentElement.classList.add('glow-disabled');
+                }
+                if (localStorage.getItem('appie_high_contrast') === 'true') {
+                  document.documentElement.classList.add('high-contrast');
+                }
+                if (localStorage.getItem('appie_reduced_motion') === 'true' || localStorage.getItem('appie_smooth_animations') === 'false') {
+                  document.documentElement.classList.add('reduced-motion');
+                }
+                var font = localStorage.getItem('appie_font_scaling');
+                if (font === 'large') {
+                  document.documentElement.style.fontSize = '17.5px';
+                } else if (font === 'x-large') {
+                  document.documentElement.style.fontSize = '19px';
+                }
               } catch (e) {}
             `,
           }}

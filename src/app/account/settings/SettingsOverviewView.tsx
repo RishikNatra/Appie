@@ -15,6 +15,7 @@ import {
   Moon,
   Sun,
   Lock,
+  KeyRound,
 } from "lucide-react";
 import { AuthUser } from "@/lib/auth-service";
 
@@ -43,10 +44,12 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
 
   // 3. Account Settings
   const [fullName, setFullName] = useState(user.fullName || user.username || "");
-  const [email, setEmail] = useState(user.email || "");
+  const [email] = useState(user.email || "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordFeedback, setPasswordFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // 4. Notifications Settings
   const [smsNotifications, setSmsNotifications] = useState(true);
@@ -67,14 +70,62 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
   const [defaultCity, setDefaultCity] = useState("Bengaluru");
 
   useEffect(() => {
-    // Read saved theme from HTML or localStorage
+    // 1. Restore local preferences
     const savedTheme = (localStorage.getItem("appie_theme") as "dark" | "light") || "dark";
     setTheme(savedTheme);
 
-    const savedFont = (localStorage.getItem("appie_font_scaling") as any) || "normal";
-    setFontScaling(savedFont);
+    const savedGlow = localStorage.getItem("appie_accent_glow");
+    if (savedGlow !== null) {
+      const isGlow = savedGlow === "true";
+      setAccentGlow(isGlow);
+      document.documentElement.classList.toggle("glow-disabled", !isGlow);
+    }
 
-    // Fetch user settings from API
+    const savedSmooth = localStorage.getItem("appie_smooth_animations");
+    if (savedSmooth !== null) {
+      const isSmooth = savedSmooth === "true";
+      setSmoothAnimations(isSmooth);
+      if (!isSmooth) {
+        document.documentElement.classList.add("reduced-motion");
+      }
+    }
+
+    const savedFont = (localStorage.getItem("appie_font_scaling") as "normal" | "large" | "x-large") || "normal";
+    setFontScaling(savedFont);
+    if (savedFont === "large") {
+      document.documentElement.style.fontSize = "17.5px";
+    } else if (savedFont === "x-large") {
+      document.documentElement.style.fontSize = "19px";
+    } else {
+      document.documentElement.style.fontSize = "16px";
+    }
+
+    const savedContrast = localStorage.getItem("appie_high_contrast");
+    if (savedContrast !== null) {
+      const isHighContrast = savedContrast === "true";
+      setHighContrast(isHighContrast);
+      document.documentElement.classList.toggle("high-contrast", isHighContrast);
+    }
+
+    const savedReduced = localStorage.getItem("appie_reduced_motion");
+    if (savedReduced !== null) {
+      const isReduced = savedReduced === "true";
+      setReducedMotion(isReduced);
+      if (isReduced) {
+        document.documentElement.classList.add("reduced-motion");
+      }
+    }
+
+    const savedLang = localStorage.getItem("appie_language");
+    if (savedLang) setLanguage(savedLang);
+
+    const savedCity = localStorage.getItem("appie_city");
+    if (savedCity) setDefaultCity(savedCity);
+
+    const savedConsultType = localStorage.getItem("appie_consultation_type") as "video" | "audio" | "chat" | null;
+    if (savedConsultType) setPreferredConsultationType(savedConsultType);
+
+    // 2. Fetch server user settings
     fetch("/api/account/settings")
       .then((res) => res.json())
       .then((data) => {
@@ -83,58 +134,170 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
           if (s.smsNotifications !== undefined) setSmsNotifications(s.smsNotifications);
           if (s.emailNotifications !== undefined) setEmailNotifications(s.emailNotifications);
           if (s.whatsappNotifications !== undefined) setWhatsappNotifications(s.whatsappNotifications);
+          if (s.orderAlerts !== undefined) setOrderAlerts(s.orderAlerts);
+          if (s.consultationReminders !== undefined) setConsultationReminders(s.consultationReminders);
           if (s.twoFactorEnabled !== undefined) setTwoFactorEnabled(s.twoFactorEnabled);
-          if (s.theme) setTheme(s.theme as "dark" | "light");
-          if (s.fontScaling) setFontScaling(s.fontScaling as any);
+          if (s.theme) {
+            setTheme(s.theme as "dark" | "light");
+            document.documentElement.setAttribute("data-theme", s.theme);
+          }
+          if (s.fontScaling) {
+            setFontScaling(s.fontScaling as any);
+            if (s.fontScaling === "large") document.documentElement.style.fontSize = "17.5px";
+            else if (s.fontScaling === "x-large") document.documentElement.style.fontSize = "19px";
+          }
+          if (s.language) setLanguage(s.language);
+          if (s.defaultCity) setDefaultCity(s.defaultCity);
+          if (s.preferredConsultationType) setPreferredConsultationType(s.preferredConsultationType);
+          if (s.telehealthConsent !== undefined) setTelehealthConsent(s.telehealthConsent);
+          if (s.pharmacyDataSharing !== undefined) setPharmacyDataSharing(s.pharmacyDataSharing);
+          if (s.healthDataConsent !== undefined) setHealthDataConsent(s.healthDataConsent);
         }
       })
       .catch(() => {});
   }, []);
 
+  // Display handlers
   const handleThemeChange = (newTheme: "dark" | "light") => {
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
     localStorage.setItem("appie_theme", newTheme);
   };
 
+  const handleAccentGlowChange = (enabled: boolean) => {
+    setAccentGlow(enabled);
+    document.documentElement.classList.toggle("glow-disabled", !enabled);
+    localStorage.setItem("appie_accent_glow", String(enabled));
+  };
+
+  const handleSmoothAnimationsChange = (enabled: boolean) => {
+    setSmoothAnimations(enabled);
+    if (!enabled || reducedMotion) {
+      document.documentElement.classList.add("reduced-motion");
+    } else {
+      document.documentElement.classList.remove("reduced-motion");
+    }
+    localStorage.setItem("appie_smooth_animations", String(enabled));
+  };
+
+  // Accessibility handlers
   const handleFontScalingChange = (scaling: "normal" | "large" | "x-large") => {
     setFontScaling(scaling);
     localStorage.setItem("appie_font_scaling", scaling);
     if (scaling === "large") {
-      document.documentElement.style.fontSize = "17px";
+      document.documentElement.style.fontSize = "17.5px";
     } else if (scaling === "x-large") {
-      document.documentElement.style.fontSize = "18.5px";
+      document.documentElement.style.fontSize = "19px";
     } else {
       document.documentElement.style.fontSize = "16px";
     }
   };
 
+  const handleHighContrastChange = (enabled: boolean) => {
+    setHighContrast(enabled);
+    document.documentElement.classList.toggle("high-contrast", enabled);
+    localStorage.setItem("appie_high_contrast", String(enabled));
+  };
+
+  const handleReducedMotionChange = (enabled: boolean) => {
+    setReducedMotion(enabled);
+    if (enabled || !smoothAnimations) {
+      document.documentElement.classList.add("reduced-motion");
+    } else {
+      document.documentElement.classList.remove("reduced-motion");
+    }
+    localStorage.setItem("appie_reduced_motion", String(enabled));
+  };
+
+  // Password update handler
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordFeedback(null);
+
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordFeedback({ type: "error", text: "New password must be at least 6 characters." });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordFeedback({ type: "error", text: "New password and confirmation do not match." });
+      return;
+    }
+
+    setPasswordSaving(true);
+    try {
+      const res = await fetch("/api/account/settings/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPasswordFeedback({ type: "success", text: data.message || "Password updated successfully." });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        setPasswordFeedback({ type: "error", text: data.error || "Failed to update password." });
+      }
+    } catch {
+      setPasswordFeedback({ type: "error", text: "Failed to connect to authentication service." });
+    } finally {
+      setPasswordSaving(false);
+      setTimeout(() => setPasswordFeedback(null), 5000);
+    }
+  };
+
+  // Main preferences save handler
   const handleSave = async () => {
     setSaving(true);
     setFeedback(null);
+
+    // Save to localStorage immediately
+    localStorage.setItem("appie_theme", theme);
+    localStorage.setItem("appie_accent_glow", String(accentGlow));
+    localStorage.setItem("appie_smooth_animations", String(smoothAnimations));
+    localStorage.setItem("appie_font_scaling", fontScaling);
+    localStorage.setItem("appie_high_contrast", String(highContrast));
+    localStorage.setItem("appie_reduced_motion", String(reducedMotion));
+    localStorage.setItem("appie_language", language);
+    localStorage.setItem("appie_city", defaultCity);
+    localStorage.setItem("appie_consultation_type", preferredConsultationType);
 
     try {
       const res = await fetch("/api/account/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          fullName,
           theme,
+          accentGlow,
+          smoothAnimations,
           fontScaling,
+          highContrast,
+          reducedMotion,
           smsNotifications,
           emailNotifications,
           whatsappNotifications,
+          orderAlerts,
+          consultationReminders,
           twoFactorEnabled,
+          telehealthConsent,
+          pharmacyDataSharing,
+          healthDataConsent,
           language,
+          preferredConsultationType,
+          defaultCity,
         }),
       });
 
       if (res.ok) {
-        setFeedback({ type: "success", text: "Settings saved successfully." });
+        setFeedback({ type: "success", text: "All settings and preferences saved successfully." });
       } else {
-        setFeedback({ type: "error", text: "Failed to persist all settings to backend." });
+        const errorData = await res.json().catch(() => ({}));
+        setFeedback({ type: "error", text: errorData.error || "Failed to persist all settings to backend." });
       }
     } catch {
-      setFeedback({ type: "success", text: "Settings updated in local preferences." });
+      setFeedback({ type: "success", text: "Settings saved to your local browser profile." });
     } finally {
       setSaving(false);
       setTimeout(() => setFeedback(null), 4000);
@@ -289,21 +452,21 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                   <input
                     type="checkbox"
                     checked={accentGlow}
-                    onChange={(e) => setAccentGlow(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    onChange={(e) => handleAccentGlowChange(e.target.checked)}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
 
                 <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>Smooth Transitions</div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Hardware-accelerated interface motion</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Hardware-accelerated interface motion &amp; transitions</div>
                   </div>
                   <input
                     type="checkbox"
                     checked={smoothAnimations}
-                    onChange={(e) => setSmoothAnimations(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    onChange={(e) => handleSmoothAnimationsChange(e.target.checked)}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
               </div>
@@ -347,13 +510,13 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                 <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>High Contrast Borders</div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Sharper borders for better readability</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Sharper borders and higher contrast for better legibility</div>
                   </div>
                   <input
                     type="checkbox"
                     checked={highContrast}
-                    onChange={(e) => setHighContrast(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    onChange={(e) => handleHighContrastChange(e.target.checked)}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
 
@@ -365,8 +528,8 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                   <input
                     type="checkbox"
                     checked={reducedMotion}
-                    onChange={(e) => setReducedMotion(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    onChange={(e) => handleReducedMotionChange(e.target.checked)}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
               </div>
@@ -388,6 +551,7 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                     className="form-input"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your legal full name"
                   />
                 </div>
 
@@ -418,20 +582,45 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                 </div>
               </div>
 
+              {/* Password Management */}
               <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "1.25rem" }}>
-                <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "0.75rem" }}>Security &amp; Password</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "0.75rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <KeyRound size={17} color="var(--color-accent)" />
+                  <span>Security &amp; Password</span>
+                </h3>
+
+                {passwordFeedback && (
+                  <div
+                    style={{
+                      marginBottom: "1rem",
+                      padding: "0.75rem 1rem",
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      background: passwordFeedback.type === "success" ? "var(--color-success-bg)" : "var(--color-error-bg)",
+                      color: passwordFeedback.type === "success" ? "var(--color-success)" : "var(--color-error)",
+                      fontSize: "0.85rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {passwordFeedback.type === "success" ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                    <span>{passwordFeedback.text}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handlePasswordUpdate} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                   <input
                     type="password"
                     className="form-input"
-                    placeholder="Current password"
+                    placeholder="Current password (optional)"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                   />
                   <input
                     type="password"
                     className="form-input"
-                    placeholder="New password"
+                    placeholder="New password (min. 6 characters)"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
@@ -442,7 +631,26 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                   />
-                </div>
+                  <div>
+                    <button
+                      type="submit"
+                      disabled={passwordSaving || !newPassword}
+                      className="btn-secondary"
+                      style={{
+                        minHeight: "40px",
+                        padding: "0 1.25rem",
+                        fontSize: "0.85rem",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        cursor: (!newPassword || passwordSaving) ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      {passwordSaving ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} />}
+                      <span>{passwordSaving ? "Updating Password..." : "Update Password"}</span>
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           )}
@@ -462,7 +670,7 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                     type="checkbox"
                     checked={smsNotifications}
                     onChange={(e) => setSmsNotifications(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
 
@@ -475,7 +683,7 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                     type="checkbox"
                     checked={emailNotifications}
                     onChange={(e) => setEmailNotifications(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
 
@@ -488,20 +696,33 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                     type="checkbox"
                     checked={whatsappNotifications}
                     onChange={(e) => setWhatsappNotifications(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
+                  />
+                </label>
+
+                <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>Order Status Alerts</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Push notifications when your pharmacy order is packed or dispatched</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={orderAlerts}
+                    onChange={(e) => setOrderAlerts(e.target.checked)}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
 
                 <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>Doctor Consultation Reminders</div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Remind 15 minutes before scheduled video sessions</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Remind 15 minutes before scheduled video and audio sessions</div>
                   </div>
                   <input
                     type="checkbox"
                     checked={consultationReminders}
                     onChange={(e) => setConsultationReminders(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
               </div>
@@ -523,7 +744,7 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                     type="checkbox"
                     checked={twoFactorEnabled}
                     onChange={(e) => setTwoFactorEnabled(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
 
@@ -536,20 +757,33 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                     type="checkbox"
                     checked={telehealthConsent}
                     onChange={(e) => setTelehealthConsent(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
 
                 <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                   <div>
                     <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>Pharmacy Prescription Sharing</div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Share issued e-prescriptions with partner pharmacies for packaging</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Share issued e-prescriptions with partner pharmacies for fulfillment</div>
                   </div>
                   <input
                     type="checkbox"
                     checked={pharmacyDataSharing}
                     onChange={(e) => setPharmacyDataSharing(e.target.checked)}
-                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)" }}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
+                  />
+                </label>
+
+                <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>Health Assessment Research Consent</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Anonymized symptom assessment training for clinical safety algorithms</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={healthDataConsent}
+                    onChange={(e) => setHealthDataConsent(e.target.checked)}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>
               </div>
@@ -602,6 +836,7 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
                     className="form-input"
                     value={defaultCity}
                     onChange={(e) => setDefaultCity(e.target.value)}
+                    placeholder="Enter city (e.g. Bengaluru, Mumbai, Delhi)"
                   />
                 </div>
               </div>

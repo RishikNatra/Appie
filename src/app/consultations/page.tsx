@@ -18,10 +18,9 @@ import ConsultationSummaryModal from "@/components/consultation/ConsultationSumm
 import PatientReviewModal from "@/components/consultation/PatientReviewModal";
 import DoctorIssuePrescriptionModal from "@/components/prescription/DoctorIssuePrescriptionModal";
 import PrescriptionViewerModal from "@/components/prescription/PrescriptionViewerModal";
-import ThemeToggle from "@/components/ThemeToggle";
 import SignOutButton from "@/components/SignOutButton";
 import NotificationBell from "@/components/notifications/NotificationBell";
-import { Activity, Calendar, Search, Stethoscope } from "lucide-react";
+import { Activity, Calendar, Search, Stethoscope, Settings } from "lucide-react";
 
 export default function ConsultationsPage() {
   const [userRole, setUserRole] = useState<"patient" | "health_professional">("patient");
@@ -98,10 +97,28 @@ export default function ConsultationsPage() {
           </span>
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
           <NotificationBell />
-          <ThemeToggle />
           <SignOutButton />
+          <Link
+            href="/account/settings"
+            aria-label="Settings"
+            title="Account & System Settings"
+            style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "10px",
+              border: "1px solid var(--border-subtle)",
+              background: "var(--bg-card)",
+              color: "var(--text-primary)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              textDecoration: "none",
+            }}
+          >
+            <Settings size={19} />
+          </Link>
         </div>
       </header>
 

@@ -50,6 +50,13 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: result.error || "Failed to update settings" }, { status: 400 });
     }
 
+    // Also synchronize full name if updated
+    if (validation.data.fullName) {
+      await updateUserProfile(user.id, {
+        fullName: validation.data.fullName,
+      });
+    }
+
     // Also synchronize 2FA toggle into the user profile if modified
     if (validation.data.twoFactorEnabled !== undefined) {
       await updateUserProfile(user.id, {

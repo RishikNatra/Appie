@@ -9,6 +9,7 @@ import MedicationBrowseComponent from "@/components/medication/MedicationBrowseC
 import MedicationCartComponent from "@/components/medication/MedicationCartComponent";
 import MedicationDetailModal from "@/components/medication/MedicationDetailModal";
 import OrderCheckoutModal from "@/components/orders/OrderCheckoutModal";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import Navbar from "@/components/Navbar";
 import { Activity, ShoppingCart, Pill, Settings } from "lucide-react";
 
@@ -159,6 +160,8 @@ export default function MedicationsPage() {
             <ShoppingCart size={17} />
             <span>Cart ({cartCount})</span>
           </button>
+
+          <NotificationBell />
 
           <Link
             href="/account/settings"

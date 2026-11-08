@@ -5,6 +5,7 @@ import Link from "next/link";
 import { PharmacyOrder, MedicationCartItem } from "@/lib/types";
 import OrderTrackingModal from "@/components/orders/OrderTrackingModal";
 import OrderCheckoutModal from "@/components/orders/OrderCheckoutModal";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import {
   Activity,
   Package,
@@ -158,8 +159,9 @@ export default function OrdersPage() {
           </nav>
         </div>
 
-        {/* 8. Settings icon at extreme right */}
+        {/* 8. Constant Notification & Settings icon at extreme right */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+          <NotificationBell />
           <Link
             href="/account/settings"
             aria-label="Settings"

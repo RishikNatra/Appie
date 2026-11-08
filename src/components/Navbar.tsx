@@ -1,5 +1,4 @@
 import Link from "next/link";
-import ThemeToggle from "./ThemeToggle";
 import { getCurrentUser } from "@/lib/auth-service";
 import SignOutButton from "./SignOutButton";
 import NotificationBell from "./notifications/NotificationBell";
@@ -201,14 +200,13 @@ export default async function Navbar() {
         )}
       </div>
 
-      {/* Right Controls: Notification, Theme, Sign Out, and 8. Settings icon at extreme top-right */}
+      {/* Right Controls: Constant Notification, Sign Out/Auth Links, and 8. Settings icon at extreme top-right */}
       <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+        {/* Constant notification bell on every page for all users */}
+        <NotificationBell />
+
         {user ? (
-          <>
-            <NotificationBell />
-            <ThemeToggle />
-            <SignOutButton />
-          </>
+          <SignOutButton />
         ) : (
           <>
             <Link
@@ -225,7 +223,6 @@ export default async function Navbar() {
             >
               Sign In
             </Link>
-            <ThemeToggle />
           </>
         )}
 

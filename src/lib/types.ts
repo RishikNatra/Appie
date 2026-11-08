@@ -132,9 +132,20 @@ export interface UserSettings {
   smsNotifications: boolean;
   emailNotifications: boolean;
   whatsappNotifications: boolean;
+  orderAlerts?: boolean;
+  consultationReminders?: boolean;
   theme: "light" | "dark" | "system";
+  accentGlow?: boolean;
+  smoothAnimations?: boolean;
   language: string;
-  fontScaling: "normal" | "large";
+  fontScaling: "normal" | "large" | "x-large";
+  highContrast?: boolean;
+  reducedMotion?: boolean;
+  preferredConsultationType?: "video" | "audio" | "chat";
+  defaultCity?: string;
+  telehealthConsent?: boolean;
+  pharmacyDataSharing?: boolean;
+  healthDataConsent?: boolean;
   twoFactorEnabled: boolean;
   activeSessions: {
     id: string;
