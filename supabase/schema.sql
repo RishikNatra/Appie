@@ -787,7 +787,7 @@ CREATE TABLE IF NOT EXISTS public.pharmacy_orders (
     discount_amount NUMERIC(10,2) NOT NULL DEFAULT 0.00,
     total_amount NUMERIC(10,2) NOT NULL DEFAULT 0.00,
     delivery_address JSONB NOT NULL DEFAULT '{}'::jsonb,
-    order_status TEXT NOT NULL CHECK (order_status IN ('placed', 'pharmacist_verified', 'packed', 'dispatched', 'out_for_delivery', 'delivered', 'cancelled')) DEFAULT 'placed',
+    order_status TEXT NOT NULL CHECK (order_status IN ('Ordered', 'Collecting', 'Delivering', 'delivered', 'Failed', 'placed', 'pharmacist_verified', 'packed', 'dispatched', 'out_for_delivery', 'cancelled')) DEFAULT 'Ordered',
     tracking_timeline JSONB NOT NULL DEFAULT '[]'::jsonb,
     courier_partner TEXT DEFAULT 'BlueDart Express Healthcare',
     tracking_number TEXT,
@@ -804,25 +804,31 @@ CREATE INDEX IF NOT EXISTS idx_orders_code ON public.pharmacy_orders(order_code)
 
 ALTER TABLE public.pharmacy_orders ENABLE ROW LEVEL SECURITY;
 
+-- Patients view own pharmacy orders
 CREATE POLICY "Patients view own pharmacy orders"
 ON public.pharmacy_orders FOR SELECT
 TO authenticated
-USING (auth.uid() = patient_id);
+USING (
+    auth.uid() = patient_id 
+    OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('pharmacist', 'delivery_partner', 'health_professional'))
+);
 
 CREATE POLICY "Patients create pharmacy orders"
 ON public.pharmacy_orders FOR INSERT
 TO authenticated
 WITH CHECK (auth.uid() = patient_id);
 
-CREATE POLICY "Patients and pharmacists update orders"
+CREATE POLICY "Roles update orders"
 ON public.pharmacy_orders FOR UPDATE
 TO authenticated
-USING (auth.uid() = patient_id OR EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'health_professional'
-))
-WITH CHECK (auth.uid() = patient_id OR EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'health_professional'
-));
+USING (
+    auth.uid() = patient_id 
+    OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('pharmacist', 'delivery_partner', 'health_professional'))
+)
+WITH CHECK (
+    auth.uid() = patient_id 
+    OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('pharmacist', 'delivery_partner', 'health_professional'))
+);
 
 -- ------------------------------------------------------------------------------
 -- 19. PAYMENT TRANSACTIONS TABLE (Payment & Transaction System)

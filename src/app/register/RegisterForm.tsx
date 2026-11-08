@@ -219,7 +219,7 @@ export default function RegisterForm() {
         "Account created! Redirecting to contact verification..."
       );
       setTimeout(() => {
-        router.push(data.redirectTo || `/verify-registration?email=${encodeURIComponent(email)}&role=${selectedRole}`);
+        router.push(data.redirectTo || "/patient/home");
         router.refresh();
       }, 700);
     } catch {

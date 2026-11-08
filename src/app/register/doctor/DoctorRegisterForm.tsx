@@ -151,7 +151,7 @@ export default function DoctorRegisterForm() {
 
       setSuccessMessage("Doctor account registered successfully! Redirecting to contact verification...");
       setTimeout(() => {
-        router.push(data.redirectTo || `/verify-registration?email=${encodeURIComponent(email.trim())}&role=health_professional`);
+        router.push(data.redirectTo || "/professional/home");
       }, 700);
     } catch {
       setErrorMessage("Network error during doctor registration. Please try again.");

@@ -1,29 +1,20 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth-service";
-import SignOutButton from "@/components/SignOutButton";
-import ThemeToggle from "@/components/ThemeToggle";
-import AccountNavBar from "@/components/AccountNavBar";
-import AppieSystemNav from "@/components/AppieSystemNav";
-import HealthAssessmentDashboard from "@/components/assessment/HealthAssessmentDashboard";
-import NotificationBell from "@/components/notifications/NotificationBell";
-import UnifiedLiveTrackerComponent from "@/components/tracking/UnifiedLiveTrackerComponent";
+import Navbar from "@/components/Navbar";
 import {
-  User,
   Activity,
   HeartPulse,
   ShieldCheck,
-  Settings,
   ArrowRight,
   Droplet,
-  Scale,
-  Ruler,
   CalendarCheck2,
   Pill,
   FileCheck,
   Truck,
+  Sparkles,
   FileText,
-  CreditCard,
+  Clock,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -47,129 +38,64 @@ export default async function PatientHomePage() {
 
   return (
     <>
-      <header className="app-header">
-        <Link href="/patient/home" className="brand-logo-wrap">
-          <div className="brand-icon-box">
-            <Activity size={22} strokeWidth={2.5} />
-          </div>
+      <Navbar />
+
+      <main className="main-wrapper" style={{ maxWidth: "1100px", width: "100%", padding: "1.5rem 1rem 5rem" }}>
+        {/* Welcome Banner */}
+        <div
+          className="dashboard-card"
+          style={{
+            padding: "2rem 2.25rem",
+            marginBottom: "2rem",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "1.25rem",
+          }}
+        >
           <div>
-            <span className="brand-name">Appie</span>
-          </div>
-          <span className="brand-badge">Patient</span>
-        </Link>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <NotificationBell />
-          <ThemeToggle />
-          <SignOutButton />
-        </div>
-      </header>
-
-      <main className="main-wrapper">
-        <div style={{ width: "100%", maxWidth: "960px", margin: "0 auto" }}>
-          <AppieSystemNav role="patient" />
-
-          {/* Welcome Banner */}
-          <div className="dashboard-card" style={{ textAlign: "left", padding: "2rem 2.25rem", marginBottom: "1.75rem" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                <div className="dashboard-avatar-box" style={{ width: "52px", height: "52px", margin: 0, fontSize: "1.4rem" }}>
-                  {(user.fullName?.[0] || user.username[0]).toUpperCase()}
-                </div>
-                <div>
-                  <h1 style={{ fontSize: "1.65rem", fontWeight: 800 }}>
-                    Welcome back, {user.fullName || user.username}
-                  </h1>
-                  <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-                    Connected to Appie Digital Healthcare Network • Patient ID: #{user.id.slice(-6).toUpperCase()}
-                  </p>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <Link
-                  href="/account/health-profile"
-                  className="btn-secondary"
-                  style={{ minHeight: "40px", fontSize: "0.85rem", padding: "0 0.85rem" }}
-                >
-                  <HeartPulse size={15} color="var(--color-accent)" />
-                  <span>Vitals: O+ / 120-80</span>
-                </Link>
-              </div>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.45rem", fontSize: "0.8rem", fontWeight: 700, color: "var(--color-success)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.3rem" }}>
+              <ShieldCheck size={16} />
+              <span>Verified Health Account • DPDPA Protected</span>
             </div>
+            <h1 style={{ fontSize: "1.85rem", fontWeight: 800 }}>
+              Welcome back, {user.fullName || user.username}
+            </h1>
+            <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem", marginTop: "0.2rem" }}>
+              Manage your symptoms, consult registered specialists, and receive verified prescription medicines.
+            </p>
           </div>
 
-          {/* LIVE TRACKING SYSTEM WIDGET */}
-          <UnifiedLiveTrackerComponent />
+          <Link
+            href="/assessment"
+            className="btn-primary"
+            style={{ minHeight: "46px", padding: "0 1.5rem", display: "inline-flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}
+          >
+            <Sparkles size={17} />
+            <span>Start Health Assessment</span>
+          </Link>
+        </div>
 
-
-          {/* Primary Quick System Navigation Grid */}
-          <div
+        {/* Linear Action Cards (Replacing bento grid with clean vertical layout) */}
+        <div className="linear-container">
+          {/* Card 1: Health Assessment & Consultations */}
+          <Link
+            href="/assessment"
+            className="linear-card"
             style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: "1rem",
-              marginBottom: "2rem",
+              padding: "1.5rem 1.75rem",
+              textDecoration: "none",
+              color: "inherit",
             }}
           >
-            <Link
-              href="/consultations"
-              className="dashboard-card"
-              style={{
-                padding: "1.25rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-                textDecoration: "none",
-                color: "inherit",
-                border: "1px solid var(--border-subtle)",
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
               <div
                 style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "12px",
-                  background: "rgba(29, 52, 138, 0.2)",
-                  color: "var(--color-primary)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <CalendarCheck2 size={24} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "0.2rem" }}>
-                  Telehealth Consultations
-                </h3>
-                <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
-                  Book video & audio consults with verified doctors.
-                </p>
-              </div>
-              <ArrowRight size={18} color="var(--color-accent)" />
-            </Link>
-
-            <Link
-              href="/medications"
-              className="dashboard-card"
-              style={{
-                padding: "1.25rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-                textDecoration: "none",
-                color: "inherit",
-                border: "1px solid var(--border-subtle)",
-              }}
-            >
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "12px",
-                  background: "rgba(255, 178, 0, 0.15)",
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "14px",
+                  background: "var(--color-primary-subtle)",
                   color: "var(--color-accent)",
                   display: "flex",
                   alignItems: "center",
@@ -177,38 +103,35 @@ export default async function PatientHomePage() {
                   flexShrink: 0,
                 }}
               >
-                <Pill size={24} />
+                <Sparkles size={26} />
               </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "0.2rem" }}>
-                  Pharmacy & Meds
-                </h3>
-                <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
-                  Authentic OTC medicines and express home delivery.
+              <div>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 700 }}>AI Symptom Assessment &amp; Clinical Triage</h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "0.2rem" }}>
+                  Select generalized symptoms with severity scoring to receive instant differential condition insights.
                 </p>
               </div>
-              <ArrowRight size={18} color="var(--color-accent)" />
-            </Link>
+            </div>
+            <ArrowRight size={20} color="var(--color-accent)" />
+          </Link>
 
-            <Link
-              href="/prescriptions"
-              className="dashboard-card"
-              style={{
-                padding: "1.25rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-                textDecoration: "none",
-                color: "inherit",
-                border: "1px solid var(--border-subtle)",
-              }}
-            >
+          {/* Card 2: e-Pharmacy */}
+          <Link
+            href="/medications"
+            className="linear-card"
+            style={{
+              padding: "1.5rem 1.75rem",
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
               <div
                 style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "12px",
-                  background: "rgba(34, 197, 94, 0.15)",
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "14px",
+                  background: "rgba(16, 185, 129, 0.12)",
                   color: "var(--color-success)",
                   display: "flex",
                   alignItems: "center",
@@ -216,91 +139,125 @@ export default async function PatientHomePage() {
                   flexShrink: 0,
                 }}
               >
-                <FileCheck size={24} />
+                <Pill size={26} />
               </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "0.2rem" }}>
-                  Digital E-Prescriptions
-                </h3>
-                <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
-                  Signed prescriptions ready to order in 1-click.
+              <div>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 700 }}>Appie Digital e-Pharmacy</h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "0.2rem" }}>
+                  Order authentic medications from licensed partner pharmacies with real-time stock availability.
                 </p>
               </div>
-              <ArrowRight size={18} color="var(--color-accent)" />
-            </Link>
-          </div>
-
-          {/* PRIMARY: FULL HEALTH ASSESSMENT SYSTEM IN PATIENT DASHBOARD */}
-          <HealthAssessmentDashboard user={user} />
-
-          {/* SECONDARY: Account System Quick Navigation Grid */}
-          <div style={{ marginTop: "3rem" }}>
-            <h2 style={{ fontSize: "1.3rem", fontWeight: 800, marginBottom: "1rem" }}>
-              Account & Records Systems
-            </h2>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem", marginBottom: "3rem" }}>
-              {/* Card 1: User Profile */}
-              <Link href="/account/profile" className="role-card" style={{ minHeight: "180px", padding: "1.5rem" }}>
-                <div className="role-icon-container" style={{ width: "42px", height: "42px", marginBottom: "0.75rem" }}>
-                  <User size={20} />
-                </div>
-                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: "0.3rem" }}>User Profile</h3>
-                <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", flex: 1 }}>
-                  Personal info, emergency contacts, digital health ID.
-                </p>
-                <div className="role-action-link" style={{ minHeight: "auto", marginTop: "0.75rem" }}>
-                  <span>Edit Profile</span>
-                  <ArrowRight size={14} />
-                </div>
-              </Link>
-
-              {/* Card 2: Health Profile */}
-              <Link href="/account/health-profile" className="role-card" style={{ minHeight: "180px", padding: "1.5rem" }}>
-                <div className="role-icon-container" style={{ width: "42px", height: "42px", marginBottom: "0.75rem" }}>
-                  <HeartPulse size={20} />
-                </div>
-                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: "0.3rem" }}>Health Profile</h3>
-                <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", flex: 1 }}>
-                  Vitals, allergies, chronic conditions, and medications.
-                </p>
-                <div className="role-action-link" style={{ minHeight: "auto", marginTop: "0.75rem" }}>
-                  <span>Update Vitals</span>
-                  <ArrowRight size={14} />
-                </div>
-              </Link>
-
-              {/* Card 3: Consent Management */}
-              <Link href="/account/consents" className="role-card" style={{ minHeight: "180px", padding: "1.5rem" }}>
-                <div className="role-icon-container" style={{ width: "42px", height: "42px", marginBottom: "0.75rem" }}>
-                  <ShieldCheck size={20} />
-                </div>
-                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: "0.3rem" }}>Consent Management</h3>
-                <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", flex: 1 }}>
-                  Data storage, telemedicine, and pharmacy sharing consents.
-                </p>
-                <div className="role-action-link" style={{ minHeight: "auto", marginTop: "0.75rem" }}>
-                  <span>Consents</span>
-                  <ArrowRight size={14} />
-                </div>
-              </Link>
-
-              {/* Card 4: Settings */}
-              <Link href="/account/settings" className="role-card" style={{ minHeight: "180px", padding: "1.5rem" }}>
-                <div className="role-icon-container" style={{ width: "42px", height: "42px", marginBottom: "0.75rem" }}>
-                  <Settings size={20} />
-                </div>
-                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, marginBottom: "0.3rem" }}>Settings</h3>
-                <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", flex: 1 }}>
-                  Notification channels, 2FA, theme, and language.
-                </p>
-                <div className="role-action-link" style={{ minHeight: "auto", marginTop: "0.75rem" }}>
-                  <span>Settings</span>
-                  <ArrowRight size={14} />
-                </div>
-              </Link>
             </div>
-          </div>
+            <ArrowRight size={20} color="var(--color-accent)" />
+          </Link>
+
+          {/* Card 3: Orders & Deliveries */}
+          <Link
+            href="/orders"
+            className="linear-card"
+            style={{
+              padding: "1.5rem 1.75rem",
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+              <div
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "14px",
+                  background: "rgba(59, 130, 246, 0.12)",
+                  color: "var(--color-accent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Truck size={26} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 700 }}>Live Orders &amp; Delivery Tracking</h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "0.2rem" }}>
+                  Monitor courier dispatch stages from Ordered to Collecting and Delivering to your door.
+                </p>
+              </div>
+            </div>
+            <ArrowRight size={20} color="var(--color-accent)" />
+          </Link>
+
+          {/* Card 4: e-Prescriptions */}
+          <Link
+            href="/prescriptions"
+            className="linear-card"
+            style={{
+              padding: "1.5rem 1.75rem",
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+              <div
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "14px",
+                  background: "rgba(168, 85, 247, 0.12)",
+                  color: "#a855f7",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <FileCheck size={26} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 700 }}>Digital e-Prescriptions Vault</h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "0.2rem" }}>
+                  Access doctor-signed digital prescriptions with dosage regimens, QR verification, and refill history.
+                </p>
+              </div>
+            </div>
+            <ArrowRight size={20} color="var(--color-accent)" />
+          </Link>
+
+          {/* Card 5: Records */}
+          <Link
+            href="/records"
+            className="linear-card"
+            style={{
+              padding: "1.5rem 1.75rem",
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "1.25rem" }}>
+              <div
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "14px",
+                  background: "rgba(245, 158, 11, 0.12)",
+                  color: "#f59e0b",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <FileText size={26} />
+              </div>
+              <div>
+                <h3 style={{ fontSize: "1.2rem", fontWeight: 700 }}>Medical Assessment &amp; Consultation Records</h3>
+                <p style={{ color: "var(--text-secondary)", fontSize: "0.88rem", marginTop: "0.2rem" }}>
+                  Search and review your past symptom logs, clinician recommendations, and follow-up notes.
+                </p>
+              </div>
+            </div>
+            <ArrowRight size={20} color="var(--color-accent)" />
+          </Link>
         </div>
       </main>
     </>

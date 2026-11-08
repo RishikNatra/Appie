@@ -105,7 +105,9 @@ export interface HealthProfile {
   isDiabetic: boolean;
   isSmoker: boolean;
   medicalConditions: string[]; // e.g. ["Hypertension", "Asthma"]
-  allergies: string[]; // e.g. ["Penicillin", "Peanuts"]
+  allergies: string[];
+  chronicConditions?: string[];
+  emergencyMedicalNotes?: string; // e.g. ["Penicillin", "Peanuts"]
   currentMedications: string[]; // e.g. ["Amlodipine 5mg", "Cetirizine 10mg"]
   medicalHistoryNotes?: string;
   createdAt: string;
@@ -360,6 +362,7 @@ export interface MedicationItem {
   strength: string;
   packSize: string;
   price: number; // INR
+  stock?: number;
   prescriptionRequired: boolean;
   usageInstructions: string;
   safetyWarnings: string;

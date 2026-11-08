@@ -151,7 +151,7 @@ export default function PharmacistRegisterForm() {
 
       setSuccessMessage("Pharmacy account registered successfully! Redirecting to contact verification...");
       setTimeout(() => {
-        router.push(data.redirectTo || `/verify-registration?email=${encodeURIComponent(email.trim())}&role=pharmacist`);
+        router.push(data.redirectTo || "/pharmacist/home");
       }, 700);
     } catch {
       setErrorMessage("Network error during pharmacy registration. Please try again.");

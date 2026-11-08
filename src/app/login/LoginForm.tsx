@@ -107,15 +107,6 @@ export default function LoginForm() {
         return;
       }
 
-      // Check if 2FA is required
-      if (data.requiresTwoFactor) {
-        setSuccessMessage("Credentials authenticated. Two-Factor Authentication required.");
-        setTimeout(() => {
-          router.push(data.redirectTo || `/login/2fa?identifier=${encodeURIComponent(identifier.trim())}&role=${selectedRole}`);
-        }, 500);
-        return;
-      }
-
       setSuccessMessage("Login successful! Redirecting to your dashboard...");
       setTimeout(() => {
         router.push(data.redirectTo || (selectedRole === "patient" ? "/patient/home" : "/professional/home"));

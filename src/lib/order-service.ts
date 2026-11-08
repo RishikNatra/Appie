@@ -280,7 +280,39 @@ export async function placePharmacyOrder(params: {
   return newOrder;
 }
 
-export async function getPatientOrders(patientId: string): Promise<PharmacyOrder[]> {
+export async function getPatientOrders(patientId: string, role?: string): Promise<PharmacyOrder[]> {
+  if (role === "pharmacist" || role === "delivery_partner") {
+    try {
+      const supabase = await createClient();
+      const { data, error } = await supabase.from("pharmacy_orders").select("*").order("created_at", { ascending: false });
+      if (!error && data && data.length > 0) {
+        return data.map((d: any) => ({
+          id: d.id,
+          orderCode: d.order_code,
+          patientId: d.patient_id,
+          prescriptionId: d.prescription_id,
+          items: d.items || [],
+          subtotal: Number(d.subtotal),
+          deliveryFee: Number(d.delivery_fee),
+          discountAmount: Number(d.discount_amount),
+          totalAmount: Number(d.total_amount),
+          deliveryAddress: d.delivery_address || {},
+          orderStatus: d.order_status,
+          trackingTimeline: d.tracking_timeline || buildTrackingTimeline(d.order_status, d.created_at),
+          courierPartner: d.courier_partner,
+          trackingNumber: d.tracking_number,
+          estimatedDelivery: d.estimated_delivery,
+          paymentId: d.payment_id,
+          paymentStatus: d.payment_status,
+          paymentMethod: "upi",
+          notes: d.notes,
+          createdAt: d.created_at,
+          updatedAt: d.updated_at,
+        }));
+      }
+    } catch (e) {}
+    return Array.from(inMemoryOrders.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -417,3 +449,24 @@ export async function cancelOrder(orderId: string, reason?: string): Promise<Pha
   return ord || null;
 }
 
+
+export async function updateOrderStatus(orderId: string, newStatus: string): Promise<boolean> {
+  const ord = inMemoryOrders.get(orderId);
+  if (ord) {
+    ord.orderStatus = newStatus as any;
+    ord.updatedAt = new Date().toISOString();
+    inMemoryOrders.set(orderId, ord);
+  }
+
+  try {
+    const supabase = await createClient();
+    await supabase.from("pharmacy_orders").update({
+      order_status: newStatus,
+      updated_at: new Date().toISOString(),
+    }).eq("id", orderId);
+  } catch (err) {
+    console.warn("Supabase updateOrderStatus warning:", err);
+  }
+
+  return true;
+}

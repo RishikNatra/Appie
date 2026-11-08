@@ -62,7 +62,7 @@ export default function SymptomEntryComponent({
   const handleSelectFromCatalog = (item: CatalogSymptom) => {
     setCurrentSymptomName(item.name);
     setCurrentCategory(item.category);
-    setSeverity(item.commonSeverity);
+    setSeverity(item.defaultSeverity || item.commonSeverity || 3);
   };
 
   const handleAddSymptom = (e: React.FormEvent) => {

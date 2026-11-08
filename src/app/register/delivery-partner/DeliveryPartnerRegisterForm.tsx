@@ -147,7 +147,7 @@ export default function DeliveryPartnerRegisterForm() {
 
       setSuccessMessage("Delivery Partner registered successfully! Redirecting to contact verification...");
       setTimeout(() => {
-        router.push(data.redirectTo || `/verify-registration?email=${encodeURIComponent(email.trim())}&role=delivery_partner`);
+        router.push(data.redirectTo || "/delivery/home");
       }, 700);
     } catch {
       setErrorMessage("Network error during delivery partner registration. Please try again.");

@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const orders = await getPatientOrders(user.id);
+  const orders = await getPatientOrders(user.id, user.role);
   return NextResponse.json({ orders, count: orders.length });
 }
 
@@ -65,4 +65,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err.message || "Failed to place order" }, { status: 500 });
   }
 }
-

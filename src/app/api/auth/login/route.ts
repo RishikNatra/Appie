@@ -34,18 +34,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error || "Authentication failed" }, { status: 401 });
     }
 
-    // 5. If 2FA is required, redirect to 2FA screen
-    if (result.requiresTwoFactor) {
-      return NextResponse.json({
-        success: true,
-        requiresTwoFactor: true,
-        identifier: validation.data.identifier,
-        redirectTo: `/login/2fa?identifier=${encodeURIComponent(
-          validation.data.identifier
-        )}&role=${validation.data.role}`,
-      });
-    }
-
+    // Direct dashboard routing (2FA verification bypassed per specification)
     const role = result.user?.role || validation.data.role;
     let redirectUrl = "/patient/home";
     if (role === "health_professional") redirectUrl = "/professional/home";

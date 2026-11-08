@@ -44,14 +44,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: result.error || "Registration failed" }, { status: 400 });
     }
 
-    // Redirect new user to registration verification screen
-    const redirectUrl = `/verify-registration?email=${encodeURIComponent(
-      validation.data.email
-    )}&role=${validation.data.role}`;
+    // Direct dashboard routing (2FA & verification bypassed per instructions)
+    const role = result.user?.role || validation.data.role;
+    let redirectUrl = "/patient/home";
+    if (role === "health_professional") redirectUrl = "/professional/home";
+    else if (role === "pharmacist") redirectUrl = "/pharmacist/home";
+    else if (role === "delivery_partner") redirectUrl = "/delivery/home";
 
     return NextResponse.json({
       success: true,
-      message: "Registration successful. Please verify your contact details.",
+      message: "Registration successful! Welcome to Appie.",
       user: result.user,
       redirectTo: redirectUrl,
     });

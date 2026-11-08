@@ -24,7 +24,7 @@ export default function LandingHero() {
 
       {/* Main Catchline strictly as instructed */}
       <h1 className="hero-main-title">
-        Your Medical Assistant for <span className="gradient-text">Patients and Doctors Alike</span>
+        Your Medical Assistant for <span style={{ color: "var(--color-accent)" }}>Patients and Doctors Alike</span>
       </h1>
 
       {/* Brief Subtext describing what Appie does */}
