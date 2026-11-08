@@ -174,20 +174,6 @@ export default function DeliveryPartnerRegisterForm() {
         </p>
       </div>
 
-      {errorMessage && (
-        <div className="form-alert error" role="alert">
-          <AlertCircle size={18} />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="form-alert success" role="status">
-          <CheckCircle2 size={18} />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} noValidate>
         {/* Step 1: Personal & Zone Info */}
         <div style={{ marginBottom: "2rem" }}>
@@ -467,6 +453,20 @@ export default function DeliveryPartnerRegisterForm() {
             </span>
           </label>
         </div>
+
+        {errorMessage && (
+          <div className="form-alert error" role="alert" style={{ marginBottom: "1rem" }}>
+            <AlertCircle size={18} />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="form-alert success" role="status" style={{ marginBottom: "1rem" }}>
+            <CheckCircle2 size={18} />
+            <span>{successMessage}</span>
+          </div>
+        )}
 
         {/* Submit Button */}
         <button

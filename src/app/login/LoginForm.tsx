@@ -248,20 +248,6 @@ export default function LoginForm() {
         </div>
       </div>
 
-      {errorMessage && (
-        <div className="form-alert error" role="alert">
-          <AlertCircle size={18} />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="form-alert success" role="status">
-          <CheckCircle2 size={18} />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} noValidate>
         <div className="form-group" style={{ marginBottom: "1rem" }}>
           <label className="form-label" htmlFor="login-identifier">
@@ -330,6 +316,20 @@ export default function LoginForm() {
             <span>Remember me</span>
           </label>
         </div>
+
+        {errorMessage && (
+          <div className="form-alert error" role="alert" style={{ marginBottom: "1rem" }}>
+            <AlertCircle size={18} />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="form-alert success" role="status" style={{ marginBottom: "1rem" }}>
+            <CheckCircle2 size={18} />
+            <span>{successMessage}</span>
+          </div>
+        )}
 
         <button
           type="submit"

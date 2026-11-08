@@ -93,6 +93,17 @@ function isLiveSupabaseConfigured(): boolean {
   );
 }
 
+export function normalizeDateOfBirth(dob?: string): string | undefined {
+  if (!dob) return undefined;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dob)) return dob;
+  const match = dob.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (match) {
+    const [, d, m, y] = match;
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+  return dob;
+}
+
 /**
  * Server-side User Registration with complete role validation
  */
@@ -104,6 +115,38 @@ export async function registerUser(input: RegisterInput): Promise<{
 }> {
   const cleanEmail = sanitizeEmail(input.email);
   const cleanUsername = sanitizeUsername(input.username);
+
+  let rawDob: string | undefined;
+  let rawGender: string | undefined;
+  let rawCity: string | undefined;
+  let rawState: string | undefined;
+  let rawPincode: string | undefined;
+  let rawAddress: string | undefined;
+
+  if (input.role === "patient") {
+    rawDob = input.dateOfBirth;
+    rawGender = input.gender;
+    rawCity = input.city;
+    rawState = input.state;
+    rawPincode = input.pincode;
+    rawAddress = input.addressLine1;
+  } else if (input.role === "health_professional") {
+    rawDob = input.dateOfBirth;
+    rawGender = input.gender;
+    rawAddress = input.clinicAddress;
+  } else if (input.role === "pharmacist") {
+    rawCity = input.city;
+    rawState = input.state;
+    rawPincode = input.pincode;
+    rawAddress = input.pharmacyAddress;
+  } else if (input.role === "delivery_partner") {
+    rawDob = input.dateOfBirth;
+    rawGender = input.gender;
+    rawCity = input.city;
+    rawAddress = input.operatingZone;
+  }
+
+  const normalizedDob = normalizeDateOfBirth(rawDob);
 
   // If live Supabase is configured, use official Supabase Auth
   if (isLiveSupabaseConfigured()) {
@@ -128,11 +171,26 @@ export async function registerUser(input: RegisterInput): Promise<{
             username: cleanUsername,
             role: input.role,
             full_name: fullName,
+            first_name: input.role === "patient" ? input.firstName : undefined,
+            last_name: input.role === "patient" ? input.lastName : undefined,
+            phone: input.phone,
+            date_of_birth: normalizedDob,
+            gender: rawGender,
+            address_line1: rawAddress,
+            city: rawCity,
+            state: rawState,
+            pincode: rawPincode,
           },
         },
       });
 
       if (error) {
+        if (error.message.includes("Database error saving new user") || error.message.toLowerCase().includes("database error")) {
+          return {
+            success: false,
+            error: "Database configuration error during registration. Please execute the provided database update script in Supabase to resolve database triggers.",
+          };
+        }
         return { success: false, error: error.message };
       }
 
@@ -145,6 +203,45 @@ export async function registerUser(input: RegisterInput): Promise<{
           fullName,
           isVerified: input.role === "patient",
         };
+
+        // Also update local stores and attempt profile update
+        try {
+          if (input.role === "patient") {
+            await updateUserProfile(data.user.id, {
+              id: data.user.id,
+              role: "patient",
+              email: cleanEmail,
+              username: cleanUsername,
+              fullName,
+              firstName: input.firstName,
+              lastName: input.lastName,
+              phone: input.phone,
+              dateOfBirth: normalizedDob,
+              gender: input.gender,
+              addressLine1: input.addressLine1 || "",
+              city: input.city || "",
+              state: input.state || "",
+              pincode: input.pincode || "",
+              isVerified: true,
+              twoFactorEnabled: false,
+            });
+          } else if (input.role === "health_professional") {
+            await updateHealthProfessionalDetails(data.user.id, {
+              userId: data.user.id,
+              prefix: input.prefix,
+              medicalLicenseNumber: input.medicalLicenseNumber,
+              medicalCouncilName: input.medicalCouncilName,
+              specialization: input.specialization,
+              qualifications: input.qualifications,
+              yearsOfExperience: input.yearsOfExperience,
+              clinicAddress: input.clinicAddress,
+              verificationStatus: "pending",
+            });
+          }
+        } catch (updateErr) {
+          console.warn("Non-fatal profile details update warning:", updateErr);
+        }
+
         await setSessionCookie(authUser);
         return { success: true, user: authUser };
       }
@@ -328,8 +425,23 @@ export async function loginUser(input: LoginInput): Promise<{
   if (isLiveSupabaseConfigured()) {
     try {
       const supabase = await createServerSupabaseClient();
+      let loginEmail = identifier;
+
+      // If user provided a username instead of email, resolve it from profiles
+      if (!identifier.includes("@")) {
+        const { data: profileRecord } = await supabase
+          .from("profiles")
+          .select("email")
+          .ilike("username", identifier)
+          .maybeSingle();
+
+        if (profileRecord?.email) {
+          loginEmail = profileRecord.email.toLowerCase();
+        }
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: identifier,
+        email: loginEmail,
         password: input.password,
       });
 

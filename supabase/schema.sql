@@ -1008,17 +1008,62 @@ CREATE TRIGGER set_follow_ups_updated_at BEFORE UPDATE ON public.care_follow_ups
 -- ------------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
+DECLARE
+  clean_username TEXT;
 BEGIN
-  INSERT INTO public.profiles (id, email, username, full_name, role, is_verified)
+  -- Generate a clean fallback username that satisfies username_format_check ^[a-zA-Z0-9_]+$ and length 3-30
+  clean_username := COALESCE(
+    NEW.raw_user_meta_data->>'username',
+    regexp_replace(split_part(NEW.email, '@', 1), '[^a-zA-Z0-9_]', '_', 'g')
+  );
+  IF char_length(clean_username) < 3 THEN
+    clean_username := clean_username || '_user';
+  END IF;
+  clean_username := substring(clean_username from 1 for 30);
+
+  INSERT INTO public.profiles (
+    id, 
+    email, 
+    username, 
+    full_name, 
+    first_name,
+    last_name,
+    phone,
+    date_of_birth,
+    gender,
+    address_line1,
+    city,
+    state,
+    pincode,
+    role, 
+    is_verified,
+    two_factor_enabled
+  )
   VALUES (
     NEW.id,
     NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)),
+    clean_username,
     COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    NEW.raw_user_meta_data->>'first_name',
+    NEW.raw_user_meta_data->>'last_name',
+    NEW.raw_user_meta_data->>'phone',
+    CASE 
+      WHEN NEW.raw_user_meta_data->>'date_of_birth' IS NOT NULL AND NEW.raw_user_meta_data->>'date_of_birth' != '' 
+      THEN (NEW.raw_user_meta_data->>'date_of_birth')::date 
+      ELSE NULL 
+    END,
+    NEW.raw_user_meta_data->>'gender',
+    NEW.raw_user_meta_data->>'address_line1',
+    NEW.raw_user_meta_data->>'city',
+    NEW.raw_user_meta_data->>'state',
+    NEW.raw_user_meta_data->>'pincode',
     COALESCE((NEW.raw_user_meta_data->>'role')::user_role, 'patient'::user_role),
-    CASE WHEN (NEW.raw_user_meta_data->>'role') = 'patient' THEN true ELSE false END
+    CASE WHEN (NEW.raw_user_meta_data->>'role') = 'patient' THEN true ELSE false END,
+    CASE WHEN (NEW.raw_user_meta_data->>'role') = 'health_professional' THEN true ELSE false END
   )
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE SET
+    full_name = COALESCE(NULLIF(EXCLUDED.full_name, ''), public.profiles.full_name),
+    updated_at = timezone('utc'::text, now());
 
   -- Automatically initialize default user settings
   INSERT INTO public.user_settings (
@@ -1028,8 +1073,7 @@ BEGIN
     whatsapp_notifications,
     theme,
     font_scaling,
-    language,
-    two_factor_enabled
+    language
   )
   VALUES (
     NEW.id,
@@ -1038,18 +1082,17 @@ BEGIN
     false,
     'dark',
     'normal',
-    'English',
-    false
+    'en'
   )
   ON CONFLICT (user_id) DO NOTHING;
 
   -- Automatically initialize mandatory default consents
-  INSERT INTO public.user_consents (user_id, category, granted, version)
+  INSERT INTO public.user_consents (user_id, category, is_granted, version)
   VALUES
     (NEW.id, 'data_processing', true, '1.0'),
     (NEW.id, 'telehealth_consultation', true, '1.0'),
     (NEW.id, 'pharmacy_sharing', true, '1.0')
-  ON CONFLICT DO NOTHING;
+  ON CONFLICT (user_id, category) DO NOTHING;
 
   RETURN NEW;
 END;

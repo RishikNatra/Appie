@@ -77,6 +77,29 @@ export default function DoctorRegisterForm() {
     }, 700);
   };
 
+  const handleDobChange = (raw: string) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    let formatted = digits;
+    if (digits.length >= 5) {
+      formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    } else if (digits.length >= 3) {
+      formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    }
+    setDateOfBirth(formatted);
+  };
+
+  const formatDobToIso = (dmy: string) => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dmy)) return dmy;
+    const parts = dmy.split("/");
+    if (parts.length === 3) {
+      const [d, m, y] = parts;
+      if (d && m && y && y.length === 4) {
+        return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+      }
+    }
+    return dmy;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
@@ -84,6 +107,20 @@ export default function DoctorRegisterForm() {
 
     if (!fullName.trim() || !phone.trim() || !dateOfBirth || !clinicAddress.trim()) {
       setErrorMessage("Please complete all personal and clinic information fields.");
+      return;
+    }
+
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateOfBirth)) {
+      setErrorMessage("Please enter date of birth in DD/MM/YYYY format (e.g. 14/05/1992).");
+      return;
+    }
+    const [dStr, mStr, yStr] = dateOfBirth.split("/");
+    const day = parseInt(dStr, 10);
+    const month = parseInt(mStr, 10);
+    const year = parseInt(yStr, 10);
+    const currentYear = new Date().getFullYear();
+    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > currentYear) {
+      setErrorMessage("Please enter a valid calendar date of birth (DD/MM/YYYY).");
       return;
     }
 
@@ -119,7 +156,7 @@ export default function DoctorRegisterForm() {
         role: "health_professional",
         prefix,
         fullName: fullName.trim(),
-        dateOfBirth,
+        dateOfBirth: formatDobToIso(dateOfBirth),
         gender,
         phone: phone.trim(),
         clinicAddress: clinicAddress.trim(),
@@ -178,20 +215,6 @@ export default function DoctorRegisterForm() {
         </p>
       </div>
 
-      {errorMessage && (
-        <div className="form-alert error" role="alert">
-          <AlertCircle size={18} />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="form-alert success" role="status">
-          <CheckCircle2 size={18} />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} noValidate>
         {/* Step 1: Personal & Clinic Information */}
         <div style={{ marginBottom: "2rem" }}>
@@ -239,14 +262,20 @@ export default function DoctorRegisterForm() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Date of Birth *</label>
+              <label className="form-label">Date of Birth (DD/MM/YYYY) *</label>
               <input
-                type="date"
+                type="text"
+                inputMode="numeric"
                 className="form-input"
+                placeholder="DD/MM/YYYY (e.g. 14/05/1992)"
+                maxLength={10}
                 value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
+                onChange={(e) => handleDobChange(e.target.value)}
                 required
               />
+              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                Format: DD/MM/YYYY
+              </span>
             </div>
           </div>
 
@@ -507,6 +536,20 @@ export default function DoctorRegisterForm() {
             </span>
           </label>
         </div>
+
+        {errorMessage && (
+          <div className="form-alert error" role="alert" style={{ marginBottom: "1rem" }}>
+            <AlertCircle size={18} />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="form-alert success" role="status" style={{ marginBottom: "1rem" }}>
+            <CheckCircle2 size={18} />
+            <span>{successMessage}</span>
+          </div>
+        )}
 
         {/* Submit Button */}
         <button

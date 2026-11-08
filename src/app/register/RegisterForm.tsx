@@ -92,6 +92,29 @@ export default function RegisterForm() {
     Boolean
   ).length;
 
+  const handleDobChange = (raw: string) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    let formatted = digits;
+    if (digits.length >= 5) {
+      formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+    } else if (digits.length >= 3) {
+      formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    }
+    setDateOfBirth(formatted);
+  };
+
+  const formatDobToIso = (dmy: string) => {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dmy)) return dmy;
+    const parts = dmy.split("/");
+    if (parts.length === 3) {
+      const [d, m, y] = parts;
+      if (d && m && y && y.length === 4) {
+        return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+      }
+    }
+    return dmy;
+  };
+
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
@@ -108,6 +131,22 @@ export default function RegisterForm() {
           return;
         }
       }
+
+      // Strict validation for DD/MM/YYYY
+      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateOfBirth)) {
+        setErrorMessage("Please enter date of birth in DD/MM/YYYY format (e.g. 14/05/1992).");
+        return;
+      }
+      const [dStr, mStr, yStr] = dateOfBirth.split("/");
+      const day = parseInt(dStr, 10);
+      const month = parseInt(mStr, 10);
+      const year = parseInt(yStr, 10);
+      const currentYear = new Date().getFullYear();
+      if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > currentYear) {
+        setErrorMessage("Please enter a valid calendar date of birth (DD/MM/YYYY).");
+        return;
+      }
+
       setCurrentStep(2);
       return;
     }
@@ -159,7 +198,7 @@ export default function RegisterForm() {
             role: "health_professional",
             prefix,
             fullName: fullName.trim(),
-            dateOfBirth,
+            dateOfBirth: formatDobToIso(dateOfBirth),
             gender,
             phone: phone.trim(),
             clinicAddress: clinicAddress.trim(),
@@ -178,7 +217,7 @@ export default function RegisterForm() {
             role: "patient",
             firstName: firstName.trim(),
             lastName: lastName.trim(),
-            dateOfBirth,
+            dateOfBirth: formatDobToIso(dateOfBirth),
             gender,
             phone: phone.trim(),
             addressLine1: addressLine1.trim(),
@@ -348,20 +387,6 @@ export default function RegisterForm() {
         </div>
       </div>
 
-      {errorMessage && (
-        <div className="alert-box alert-error" role="alert">
-          <AlertCircle size={18} className="alert-icon" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="alert-box alert-success" role="alert">
-          <CheckCircle2 size={18} className="alert-icon" />
-          <span>{successMessage}</span>
-        </div>
-      )}
-
       {/* STEP 1: Personal & Contact Information */}
       {currentStep === 1 && (
         <form onSubmit={handleNextStep}>
@@ -452,17 +477,23 @@ export default function RegisterForm() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div className="form-group">
-              <label className="form-label">Date of Birth</label>
+              <label className="form-label">Date of Birth (DD/MM/YYYY) *</label>
               <div className="input-wrapper">
                 <span className="input-leading-icon"><Calendar size={18} /></span>
                 <input
-                  type="date"
+                  type="text"
+                  inputMode="numeric"
                   className="form-input"
+                  placeholder="DD/MM/YYYY (e.g. 14/05/1992)"
+                  maxLength={10}
                   value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  onChange={(e) => handleDobChange(e.target.value)}
                   required
                 />
               </div>
+              <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                Format: DD/MM/YYYY
+              </span>
             </div>
 
             <div className="form-group">
@@ -570,6 +601,13 @@ export default function RegisterForm() {
             </>
           )}
 
+          {errorMessage && (
+            <div className="alert-box alert-error" role="alert" style={{ marginTop: "1.25rem", marginBottom: "0.25rem" }}>
+              <AlertCircle size={18} className="alert-icon" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           <div style={{ marginTop: "1.75rem" }}>
             <button type="submit" className="btn-primary" id="btn-next-step">
               <span>Continue to Next Step</span>
@@ -659,6 +697,13 @@ export default function RegisterForm() {
               required
             />
           </div>
+
+          {errorMessage && (
+            <div className="alert-box alert-error" role="alert" style={{ marginTop: "1.25rem", marginBottom: "0.25rem" }}>
+              <AlertCircle size={18} className="alert-icon" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
           <div style={{ display: "flex", gap: "1rem", marginTop: "1.75rem" }}>
             <button
@@ -872,6 +917,20 @@ export default function RegisterForm() {
               </span>
             </label>
           </div>
+
+          {errorMessage && (
+            <div className="alert-box alert-error" role="alert" style={{ marginBottom: "1.25rem" }}>
+              <AlertCircle size={18} className="alert-icon" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="alert-box alert-success" role="alert" style={{ marginBottom: "1.25rem" }}>
+              <CheckCircle2 size={18} className="alert-icon" />
+              <span>{successMessage}</span>
+            </div>
+          )}
 
           {/* Registration Action Component */}
           <div style={{ display: "flex", gap: "1rem" }}>
