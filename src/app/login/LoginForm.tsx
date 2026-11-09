@@ -318,16 +318,51 @@ export default function LoginForm() {
         </div>
 
         {errorMessage && (
-          <div className="form-alert error" role="alert" style={{ marginBottom: "1rem" }}>
-            <AlertCircle size={18} />
-            <span>{errorMessage}</span>
+          <div
+            className="form-alert error"
+            role="alert"
+            style={{
+              marginBottom: "1.25rem",
+              padding: "0.85rem 1.15rem",
+              borderRadius: "12px",
+              background: "rgba(239, 68, 68, 0.1)",
+              border: "1px solid rgba(239, 68, 68, 0.35)",
+              color: "#ef4444",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              fontFamily: "inherit",
+              fontSize: "0.92rem",
+              fontWeight: 600,
+            }}
+          >
+            <AlertCircle size={20} color="#ef4444" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+            <span style={{ color: "#ef4444", lineHeight: 1.4 }}>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="form-alert success" role="status" style={{ marginBottom: "1rem" }}>
-            <CheckCircle2 size={18} />
-            <span>{successMessage}</span>
+          <div
+            className="form-alert success"
+            role="status"
+            style={{
+              marginBottom: "1.25rem",
+              padding: "0.85rem 1.15rem",
+              borderRadius: "12px",
+              background: "rgba(16, 185, 129, 0.1)",
+              border: "1px solid rgba(16, 185, 129, 0.35)",
+              color: "#10b981",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+              fontFamily: "inherit",
+              fontSize: "0.92rem",
+              fontWeight: 600,
+              boxShadow: "0 2px 10px rgba(16, 185, 129, 0.08)",
+            }}
+          >
+            <CheckCircle2 size={20} color="#10b981" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+            <span style={{ color: "#10b981", lineHeight: 1.4 }}>{successMessage}</span>
           </div>
         )}
 

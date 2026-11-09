@@ -40,6 +40,7 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
   // 2. Accessibility Settings
   const [fontScaling, setFontScaling] = useState<"normal" | "large" | "x-large">("normal");
   const [highContrast, setHighContrast] = useState(false);
+  const [dyslexiaMode, setDyslexiaMode] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   // 3. Account Settings
@@ -105,6 +106,13 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
       const isHighContrast = savedContrast === "true";
       setHighContrast(isHighContrast);
       document.documentElement.classList.toggle("high-contrast", isHighContrast);
+    }
+
+    const savedDyslexia = localStorage.getItem("appie_dyslexia_mode");
+    if (savedDyslexia !== null) {
+      const isDyslexia = savedDyslexia === "true";
+      setDyslexiaMode(isDyslexia);
+      document.documentElement.classList.toggle("dyslexia-mode", isDyslexia);
     }
 
     const savedReduced = localStorage.getItem("appie_reduced_motion");
@@ -197,6 +205,12 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
     setHighContrast(enabled);
     document.documentElement.classList.toggle("high-contrast", enabled);
     localStorage.setItem("appie_high_contrast", String(enabled));
+  };
+
+  const handleDyslexiaModeChange = (enabled: boolean) => {
+    setDyslexiaMode(enabled);
+    document.documentElement.classList.toggle("dyslexia-mode", enabled);
+    localStorage.setItem("appie_dyslexia_mode", String(enabled));
   };
 
   const handleReducedMotionChange = (enabled: boolean) => {
@@ -509,13 +523,26 @@ export default function SettingsOverviewView({ user }: { user: AuthUser }) {
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem", borderTop: "1px solid var(--border-subtle)", paddingTop: "1.25rem" }}>
                 <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>High Contrast Borders</div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Sharper borders and higher contrast for better legibility</div>
+                    <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>High Contrast Mode</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Bright yellow text with vivid cyan/green UI borders for maximum visibility</div>
                   </div>
                   <input
                     type="checkbox"
                     checked={highContrast}
                     onChange={(e) => handleHighContrastChange(e.target.checked)}
+                    style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
+                  />
+                </label>
+
+                <label style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }}>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: "0.92rem" }}>Dyslexia Friendly Mode</div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Enforces uniform typography and consistent stroke weight across all text</div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={dyslexiaMode}
+                    onChange={(e) => handleDyslexiaModeChange(e.target.checked)}
                     style={{ width: "20px", height: "20px", accentColor: "var(--color-accent)", cursor: "pointer" }}
                   />
                 </label>

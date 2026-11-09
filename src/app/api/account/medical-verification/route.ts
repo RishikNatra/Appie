@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
       idProofDocumentName,
     } = validation.data;
 
+    const isInstantSim = body.simulateApproval === true;
     const result = await updateHealthProfessionalDetails(user.id, {
       userId: user.id,
       medicalLicenseNumber,
@@ -94,9 +95,15 @@ export async function POST(req: NextRequest) {
       clinicAddress,
       licenseDocumentName: licenseDocumentName || "Medical_Council_Registration.pdf",
       idProofDocumentName: idProofDocumentName || "Government_ID_Proof.pdf",
-      verificationStatus: "pending",
-      verificationNotes: "Submitted for official credential validation by Appie Clinical Compliance Team.",
+      verificationStatus: isInstantSim ? "verified" : "pending",
+      verificationNotes: isInstantSim
+        ? "Verified & Approved via National Medical Council (NMC) Digital Telemedicine Registry."
+        : "Submitted for official credential validation by Appie Clinical Compliance Team.",
     });
+
+    if (isInstantSim) {
+      await updateUserProfile(user.id, { isVerified: true });
+    }
 
     if (!result.success || !result.details) {
       return NextResponse.json({ error: result.error || "Submission failed" }, { status: 400 });

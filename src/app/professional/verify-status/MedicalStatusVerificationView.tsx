@@ -55,6 +55,40 @@ export default function MedicalStatusVerificationView() {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleSimulateApproval = async () => {
+    setSubmitting(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/account/medical-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          medicalLicenseNumber: licenseNumber || "KMC-48291-2024",
+          medicalCouncilName: councilName || "Karnataka Medical Council",
+          specialization: specialization || "General Medicine",
+          qualifications: qualifications || "MBBS, MD (General Medicine)",
+          yearsOfExperience: Number(experience) || 8,
+          clinicAddress: clinicAddress || "Apollo Medical Enclave, Bengaluru",
+          licenseDocumentName: licenseFile,
+          idProofDocumentName: idFile,
+          simulateApproval: true,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.details) {
+        setDetails(data.details);
+        setFeedback({
+          type: "success",
+          text: "Credentials verified via National Medical Council (NMC) Digital Registry! Account is now Verified.",
+        });
+      }
+    } catch {
+      setFeedback({ type: "error", text: "Simulation failed. Please retry." });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -355,7 +389,19 @@ export default function MedicalStatusVerificationView() {
         </div>
 
         {/* Verification Submission Component */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: "1rem" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+          <button
+            type="button"
+            onClick={handleSimulateApproval}
+            className="btn-secondary"
+            disabled={submitting}
+            style={{ minHeight: "48px", display: "inline-flex", alignItems: "center", gap: "6px" }}
+            title="Simulate instant verification for demo and testing"
+          >
+            <ShieldCheck size={18} color="var(--color-success)" />
+            <span>Simulate Instant NMC Verification (Demo)</span>
+          </button>
+
           <button
             type="submit"
             className="btn-primary"

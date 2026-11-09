@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import Navbar from "@/components/Navbar";
 import { getCurrentUser } from "@/lib/auth-service";
 import LandingHero from "@/components/landing/LandingHero";
 import DemonstrationShowcase from "@/components/landing/DemonstrationShowcase";
@@ -26,7 +25,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <Navbar />
 
       <main className="landing-container" style={{ paddingBottom: "4rem" }}>
         {/* Minimal Hero Section */}

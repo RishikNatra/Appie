@@ -34,6 +34,9 @@ export default function RootLayout({
                 if (localStorage.getItem('appie_high_contrast') === 'true') {
                   document.documentElement.classList.add('high-contrast');
                 }
+                if (localStorage.getItem('appie_dyslexia_mode') === 'true') {
+                  document.documentElement.classList.add('dyslexia-mode');
+                }
                 if (localStorage.getItem('appie_reduced_motion') === 'true' || localStorage.getItem('appie_smooth_animations') === 'false') {
                   document.documentElement.classList.add('reduced-motion');
                 }

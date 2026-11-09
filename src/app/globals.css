@@ -1804,28 +1804,117 @@ body.glow-disabled {
   display: none !important;
 }
 
-/* 2. High Contrast Setting */
+/* 2. High Contrast Setting: Bright Yellow Text & Vivid Cyan/Green UI Borders */
 html.high-contrast,
 :root.high-contrast,
 body.high-contrast {
-  --border-subtle: #4b5563 !important;
-  --border-medium: #9ca3af !important;
-  --text-muted: #d1d5db !important;
-  --text-secondary: #e5e7eb !important;
+  --color-primary: #00e5a3 !important;
+  --color-accent: #ffe600 !important;
+  --text-primary: #ffff22 !important;
+  --text-secondary: #ffee55 !important;
+  --text-muted: #fff59d !important;
+  --border-subtle: #00e5a3 !important;
+  --border-medium: #00f0b5 !important;
+  --border-strong: #00ffd5 !important;
+  --border-accent: #ffe600 !important;
+  --bg-base: #05080a !important;
+  --bg-surface: #091014 !important;
+  --bg-card: #0d151a !important;
 }
+
 [data-theme="light"].high-contrast,
 [data-theme="light"] body.high-contrast {
-  --border-subtle: #374151 !important;
-  --border-medium: #111827 !important;
-  --text-muted: #374151 !important;
-  --text-secondary: #1f2937 !important;
+  --color-primary: #00875a !important;
+  --color-accent: #d97706 !important;
+  --text-primary: #854d0e !important;
+  --text-secondary: #a16207 !important;
+  --text-muted: #ca8a04 !important;
+  --border-subtle: #00a876 !important;
+  --border-medium: #00875a !important;
+  --border-strong: #046c4e !important;
 }
+
+.high-contrast,
+.high-contrast * {
+  border-color: #00e5a3 !important;
+}
+
+.high-contrast h1,
+.high-contrast h2,
+.high-contrast h3,
+.high-contrast h4,
+.high-contrast h5,
+.high-contrast h6,
+.high-contrast p,
+.high-contrast span,
+.high-contrast a,
+.high-contrast label,
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea,
+.high-contrast button,
+.high-contrast strong {
+  color: #ffff22 !important;
+}
+
 .high-contrast .dashboard-card,
 .high-contrast .linear-card,
 .high-contrast .form-input,
 .high-contrast .btn-secondary,
-.high-contrast .app-header {
-  border-width: 1.5px !important;
+.high-contrast .btn-primary,
+.high-contrast .app-header,
+.high-contrast .hero-wrapper,
+.high-contrast .auth-card {
+  border: 2px solid #00e5a3 !important;
+  box-shadow: 0 0 12px rgba(0, 229, 163, 0.25) !important;
+}
+
+.high-contrast .btn-primary {
+  background: #00e5a3 !important;
+  color: #05080a !important;
+  font-weight: 800 !important;
+  border: 2px solid #00ffd5 !important;
+}
+
+.high-contrast .btn-primary * {
+  color: #05080a !important;
+}
+
+/* 4. Dyslexia Friendly Mode: All text forced to unified legible font and uniform thickness */
+html.dyslexia-mode,
+:root.dyslexia-mode,
+body.dyslexia-mode,
+.dyslexia-mode * {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', 'Trebuchet MS', 'Segoe UI', -apple-system, sans-serif !important;
+  font-weight: 550 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.65 !important;
+  word-spacing: 0.08em !important;
+}
+
+/* Modern Form Alerts Default Styling */
+.form-alert {
+  padding: 0.85rem 1.15rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 1.25rem;
+}
+
+.form-alert.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+}
+
+.form-alert.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
 }
 
 /* 3. Reduced Motion Setting */

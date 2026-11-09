@@ -172,6 +172,48 @@ export default function OrderTrackingModal({
           </div>
         </div>
 
+        {/* Live Map Tracking Simulation */}
+        <div style={{ marginBottom: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.6rem" }}>
+            <h4 style={{ fontSize: "0.95rem", fontWeight: 700 }}>Live Transit Map & Courier Beacon</h4>
+            <span style={{ fontSize: "0.75rem", color: "var(--color-success)", fontWeight: 600 }}>● Live Telemetry (GPS Active)</span>
+          </div>
+
+          <div
+            style={{
+              width: "100%",
+              height: "190px",
+              borderRadius: "12px",
+              background: "linear-gradient(135deg, #091014 0%, #111a22 100%)",
+              border: "1.5px solid var(--border-medium)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <svg width="100%" height="100%" viewBox="0 0 600 190" preserveAspectRatio="none">
+              <path d="M 40 95 L 180 95 L 180 40 L 400 40 L 400 140 L 560 140" fill="none" stroke="#1e293b" strokeWidth="10" strokeLinecap="round" />
+              <path d="M 40 95 L 180 95 L 180 40 L 320 40" fill="none" stroke="#00e5a3" strokeWidth="4" strokeLinecap="round" strokeDasharray="6 4" />
+              
+              {/* Origin */}
+              <circle cx="40" cy="95" r="9" fill="#00e5a3" />
+              <text x="40" y="125" fill="#00e5a3" fontSize="10" fontWeight="700" textAnchor="middle">Indiranagar Pharmacy</text>
+
+              {/* Courier Rider */}
+              <circle cx="320" cy="40" r="14" fill="#ffe600" opacity="0.3" className="animate-ping" />
+              <circle cx="320" cy="40" r="7" fill="#ffe600" />
+              <text x="320" y="24" fill="#ffe600" fontSize="11" fontWeight="700" textAnchor="middle">🛵 Courier Fleet</text>
+
+              {/* Destination */}
+              <circle cx="560" cy="140" r="9" fill="#ef4444" />
+              <text x="560" y="170" fill="#ef4444" fontSize="10" fontWeight="700" textAnchor="middle">Your Address</text>
+            </svg>
+
+            <div style={{ position: "absolute", bottom: "10px", left: "12px", background: "rgba(0,0,0,0.75)", padding: "4px 8px", borderRadius: "6px", fontSize: "0.72rem", color: "#f4f4f5" }}>
+              Carrier: {currentOrder.courierPartner || "Express Healthcare Logistics"} • Contact: +91 97410 99882
+            </div>
+          </div>
+        </div>
+
         {/* Live Step Tracker Timeline */}
         <div style={{ marginBottom: "1.75rem" }}>
           <h4 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "1rem" }}>

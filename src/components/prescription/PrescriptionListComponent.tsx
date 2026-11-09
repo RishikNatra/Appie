@@ -128,12 +128,12 @@ export default function PrescriptionListComponent({
                 </div>
               </div>
 
-              <div>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 <button
                   type="button"
                   onClick={() => onSelectPrescription(rx)}
                   className="btn-primary"
-                  style={{ minHeight: "48px", padding: "0 1.25rem", fontSize: "0.88rem" }}
+                  style={{ minHeight: "44px", padding: "0 1.15rem", fontSize: "0.88rem", display: "inline-flex", alignItems: "center", gap: "6px" }}
                 >
                   <FileCheck size={16} />
                   <span>View Official E-Rx</span>
