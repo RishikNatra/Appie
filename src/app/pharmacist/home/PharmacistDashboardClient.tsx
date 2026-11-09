@@ -254,7 +254,7 @@ export default function PharmacistDashboardClient({ user }: Props) {
                           <div>
                             <strong style={{ fontSize: "0.9rem" }}>{item.medicineName}</strong>
                             <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginLeft: "0.5rem" }}>
-                              Qty: {item.quantity} • ₹{item.unitPrice.toFixed(2)}
+                              Qty: {item.quantity} • ₹{(item.unitPrice ?? (item.totalPrice ? item.totalPrice / (item.quantity || 1) : 0)).toFixed(2)}
                             </span>
                           </div>
                           <span style={{ fontSize: "0.75rem", padding: "2px 8px", borderRadius: "6px", background: "var(--color-success-bg)", color: "var(--color-success)", fontWeight: 700 }}>

@@ -4,7 +4,7 @@ import LandingHero from "@/components/landing/LandingHero";
 import DemonstrationShowcase from "@/components/landing/DemonstrationShowcase";
 import HelpUsDiagnoseSection from "@/components/landing/HelpUsDiagnoseSection";
 import Link from "next/link";
-import { Activity, ShieldCheck, HeartPulse, Clock, Sparkles } from "lucide-react";
+import { Activity, ShieldCheck, HeartPulse, Clock, Sparkles, LogIn } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,50 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* Landing Minimal Top Bar: Appie Logo part on the left, Sign In icon on the right */}
+      <header
+        className="app-header"
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 100,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "0.75rem 2rem",
+          maxWidth: "100%",
+        }}
+      >
+        <Link href="/" className="brand-logo-wrap" title="Appie Healthcare">
+          <div className="brand-icon-box">
+            <Activity size={22} strokeWidth={2.5} />
+          </div>
+          <div>
+            <span className="brand-name">Appie</span>
+          </div>
+        </Link>
+
+        <Link
+          href="/login"
+          className="btn-secondary"
+          title="Sign In"
+          aria-label="Sign In to Appie"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            minHeight: "40px",
+            padding: "0 1rem",
+            fontSize: "0.88rem",
+            fontWeight: 600,
+            textDecoration: "none",
+            borderRadius: "10px",
+          }}
+        >
+          <LogIn size={18} color="var(--color-accent)" />
+          <span>Sign In</span>
+        </Link>
+      </header>
 
       <main className="landing-container" style={{ paddingBottom: "4rem" }}>
         {/* Minimal Hero Section */}
