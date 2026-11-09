@@ -833,3 +833,597 @@ Major functional systems:
 ---
 
 ## Initial Ideation
+Early concept directions validated and iterated through user studies and technical prototyping:
+
+- **Conversational-first & Structured Hybrid Intake:** A dual-entry triage interface where users can describe issues in natural language or quickly select structured symptoms (e.g., headache, fever, cough) with 1–5 severity scoring and duration chips, drastically reducing cognitive and physical typing friction during acute illness.
+- **"Who Reviewed This?" Clinical Credibility Gate:** Every health evaluation prominently features a dedicated verification badge detailing the evaluating licensed physician's registration number (e.g., State Medical Council / NMC), qualifications, and timestamp before recommendations or prescriptions are released.
+- **Single Connected Horizontal Journey:** Unifying symptom entry, AI risk scoring, clinician consultation, e-prescription generation, pharmacy dispensing, and live courier tracking into one persistent, horizontally navigable care timeline rather than fragmented, siloed applications.
+- **"Not Sure Yet" Clinical Escalation Pathway:** A persistent safety action allowing the user at any point during AI triage to instantly escalate to a live licensed practitioner, directly mitigating user anxiety and distrust in purely automated bots.
+- **Household & Caregiver Profiles:** Fast, lightweight profile switcher enabling young working adults to manage pediatric or geriatric episodes for dependents with consent-bound digital records.
+- **Recurring-Issue Express Shortcut:** Prior history recognition offering a streamlined intake path for verified repeat minor ailments (e.g., seasonal allergic rhinitis) that reuses baseline demographic and allergy context.
+
+---
+
+## Design Brief (Finalised)
+
+### Strategy & Vision
+- **Product Name & Classification:** Appie — Digital Healthcare Assistant (Web-First Responsive Application).
+- **Core Purpose:** Enable time-poor urban working professionals and families in India to resolve routine, non-emergency health concerns (from initial symptom recognition to verified medical consultation and doorstep medication delivery) within a single, continuous, and clinically accountable digital loop.
+- **Target Demographics:** Primary audience of young urban professionals aged 22–40 across Tier-1 and Tier-2 Indian cities, balancing intense work schedules with high digital literacy.
+- **Value Proposition:** Eliminate 2–4 hours of lost productivity, travel friction, and waiting room exposure for routine ailments through clinically validated triage, rapid Telemedicine consultations, and cold-chain pharmaceutical fulfillment within 45 minutes.
+
+### Scope & Guardrails
+- **Included Scope (v1):**
+  - Multi-modal symptom assessment (chat + structured chips + 1–5 severity scale).
+  - Rule-assisted AI risk stratification with strict NMC Telemedicine Practice Guidelines (2020) red-flag escalation triggers.
+  - Telemedicine consultation booking and encrypted video/chat communication with registered medical practitioners.
+  - Tamper-proof, cryptographically sealed e-prescriptions conforming to NMC Section 6 and the IT Act 2000.
+  - Closed-loop e-pharmacy checkout, cold-chain compliant logistics, and live doorstep GPS courier tracking.
+  - Personal health record vault with DPDPA-compliant granular consent management.
+  - Comprehensive accessibility suite (Dark Mode, High Contrast Mode with yellow text / cyan borders, Dyslexia Mode, and font scaling).
+- **Out of Scope (v1):** Emergency trauma handling (immediate tertiary hospital redirect), invasive diagnostic ordering, specialized chronic oncology/cardiology marketplace, and direct narcotic/Schedule X dispensing.
+
+### Operational & Legal Constraints
+- **Telemedicine Practice Guidelines (NMC 2020):** Every prescription-triggering event mandates explicit human clinician sign-off; no prescription may be issued solely by automated AI algorithms.
+- **Digital Personal Data Protection Act (DPDPA 2023):** Explicit purpose-bound consent for sharing health records with pharmacies and labs; complete right-to-forget and revocable data agreements.
+- **CDSCO Drugs & Cosmetics Act:** Restricted to verified Over-The-Counter (OTC) and valid Schedule H/H1 e-prescriptions fulfilled by licensed retail pharmacies.
+
+---
+
+## Ideation and Conceptualization
+
+### Conceptual Exploration Vectors
+The ideation phase explored four distinct structural archetypes to bridge the gap between patient self-care and professional clinical intervention:
+
+1. **Vector A: Chat-Only Bot Paradigm (Rejected)**
+   - *Concept:* Pure conversational chatbot modeled after messaging apps.
+   - *Evaluation:* While intuitive for intake, unstructured text inputs resulted in high ambiguity, excessive conversational turns, and significant user frustration when attempting to review complex multi-item medication orders or legal dispatches.
+2. **Vector B: Aggregator Portal Paradigm (Rejected)**
+   - *Concept:* Marketplace directory directing users outward to separate third-party clinics, pharmacies, and lab aggregators.
+   - *Evaluation:* Reintroduced the exact fragmentation and context loss identified in contextual inquiry; users had to manually re-enter their symptoms and medical history across disconnected apps.
+3. **Vector C: The Unified Closed-Loop Assistant (Selected & Finalised)**
+   - *Concept:* A unified linear care pathway integrating symptom intake, AI clinical risk scoring, mandatory clinician review gate, e-prescription generation, and integrated e-pharmacy routing within a single coherent application frame.
+   - *Evaluation:* Yielded the highest user confidence, lowest cognitive friction, zero data re-entry, and airtight regulatory compliance.
+
+### Conceptual Brainstorming Matrix
+| Dimension | Exploration Option 1 | Exploration Option 2 | Final Selected Concept (Appie) |
+| :--- | :--- | :--- | :--- |
+| **Symptom Input** | Free-form long text box | Exhaustive static dropdowns | Dynamic natural search + interactive severity tags (1–5) |
+| **Clinical Review** | Async email report within 24h | Instant bot prescription (illegal) | Synchronous clinical safety gate with live consultation handoff |
+| **Medication Access**| External prescription download | Partner clinic pickup only | 1-click cart transfer, CDSCO pharmacy validation & doorstep dispatch |
+| **Navigation** | Deeply nested hierarchical menus | Separate standalone web apps | Horizontal sliding multi-pane window with persistent status tabs |
+
+---
+
+## Human Factors and Interaction Constraints Verified to the Final Concepts and Reiterating the Concepts
+
+### Ergonomic, Cognitive, and Human Factor Analysis
+Design decisions were evaluated against established human factors principles under the context of physical distress and acute cognitive impairment:
+
+- **Cognitive Load Under Malaise (Sweller's Cognitive Load Theory):** When individuals experience fever, cephalalgia, or acute respiratory discomfort, executive working memory is severely compromised. Multi-stage nested menus and dense clinical jargon trigger decision paralysis.
+  - *Design Reiteration:* Implemented progressive disclosure across the assessment flow, replacing open-ended diagnostic queries with recognized symptom chips, binary selectors, and visual numeric severity sliders.
+- **Hick's Law in Clinician & Medication Discovery:** Minimizing decision time when choosing healthcare professionals and essential relief medicines.
+  - *Design Reiteration:* Constrained doctor discovery to three primary criteria (Availability, Specialty, and Consultation Fee) and pre-filtered listings automatically based on the triage output.
+- **Fitts's Law & Motor Ergonomics:** Motor accuracy decreases under fatigue or tremors.
+  - *Design Reiteration:* Expanded touch/click targets for primary action controls (e.g., "Submit Symptoms", "Order Prescribed Medicines", "Proceed to Checkout") to a minimum hit target of `48px` height with `12px` border-radius and high visual hierarchy.
+- **Trust & Affective Ergonomics (Norman's Emotional Design):** Visceral and reflective trust are essential in digital health.
+  - *Design Reiteration:* Positioned the clinician's identity, State Medical Council registration, and official digital signature badge directly adjacent to clinical recommendations to eliminate visceral skepticism.
+
+---
+
+## Redefined Concepts Through All Possible Constraints
+
+To make the conceptual model academically sound and technologically viable, every concept was redefined against legal, technical, clinical, and accessibility constraints:
+
+```
+[ Unconstrained Idea ] ─────────────> [ Constraint Filter ] ─────────────> [ Redefined Production Concept ]
+Instant Autonomous Rx                NMC Telemedicine Guidelines          Mandatory Clinician Review Gate
+Unrestricted Drug Delivery           CDSCO Schedule H / X Regulations     Verified E-Rx Fulfillable OTC/H Only
+Complex Multi-Page Forms             Cognitive Malaise / Mobile Screens   Horizontal Sliding Window & Single Panes
+Generic Standard Typography          Accessibility & Neurodiversity       High-Contrast Yellow/Cyan & Dyslexia Modes
+Client-Side API Key Triage           Security / OWASP Top 10              Zero-Client Secrets & Server Rate-Limiting
+```
+
+1. **Autonomous AI Triage → Mandatory Clinician Gate:** Initial ideas of algorithmic self-medication were discarded. The redefined concept utilizes AI strictly for pre-triage data structuring and preliminary differential guidance, routing 100% of prescription decisions to licensed human practitioners.
+2. **Standard High-Friction Form Layouts → Horizontal Sliding Window Panes:** Multi-page full reloads were redesigned into horizontal snap-sliding panes (`scroll-snap-type: x mandatory`). This enables users to effortlessly swipe or scroll horizontally across Cart, Active Tracking, and History within the exact same window.
+3. **Accessibility Overhaul (High Contrast & Dyslexia Modes):** Real-world users include individuals with low vision, visual fatigue, and reading difficulties. Accessibility was redefined from passive compliance into an active theme suite offering high-contrast vivid yellow text (`#ffff22`) with cyan/green borders (`#00e5a3`) and a unified-weight Dyslexia-friendly typography mode.
+4. **Zero-Trust Security & Rate-Limiting:** All user inputs across search and registration are rigorously validated through server-side Zod schemas with string sanitizers to prevent SQL injection, Cross-Site Scripting (XSS), and LLM prompt injection, combined with Upstash/in-memory rate limiting.
+
+---
+
+## Show Clear Information Architecture with Clear Navigation Structure
+
+### Information Architecture (IA) Hierarchy
+
+```
+Appie Platform (Root)
+│
+├── 0.0 Landing & Discovery (Public)
+│   ├── Minimal Header (Brand Logo + Sign In)
+│   ├── Value Proposition & Clinical Safeguard Hero
+│   ├── Video Demonstration Showcase (Horizontally Sliding MP4 Viewport)
+│   └── Trust & Compliance Badges (NMC, CDSCO, 256-Bit Encryption)
+│
+├── 1.0 Authentication & Identity Management
+│   ├── Unified Sign In (Role Tabs: Patient | Doctor | Pharmacist | Delivery)
+│   ├── Patient Registration & Profile Onboarding
+│   ├── Healthcare Partner Onboarding (Doctor, Pharmacy, Logistics)
+│   └── Password Recovery & Secure Session Management
+│
+├── 2.0 Health Assessment System (Patient Portal)
+│   ├── 2.1 Symptom Search & Tag Explorer
+│   ├── 2.2 Severity Scoring Grid (1 to 5 Scale + Duration Tags)
+│   ├── 2.3 Medical AI Evaluation Engine
+│   │   ├── Clinical Urgency Stratification (Emergency | Urgent | Routine)
+│   │   ├── Differential Care Considerations & Home Measures
+│   │   └── Recommended Over-The-Counter / Prescription Classes
+│   └── 2.4 Clinician Handoff Router
+│
+├── 3.0 Consultation & Telehealth System
+│   ├── 3.1 Doctor Discovery (Filters: Speciality, Fee, Experience, Rating)
+│   ├── 3.2 Appointment Scheduler (Date, Slot, Consultation Mode)
+│   └── 3.3 Telemedicine Consultation Room (Secure Audio/Video/Chat)
+│
+├── 4.0 Prescription & Clinical Documentation System
+│   ├── 4.1 E-Prescription Viewer (Rx Details, Digital Signature, NMC Seal)
+│   ├── 4.2 Document Export Actions (System Print, Text/PDF Download, Share Link)
+│   └── 4.3 1-Click Cart Transfer Pipeline
+│
+├── 5.0 Medication & E-Pharmacy System
+│   ├── 5.1 CDSCO-Verified Medicine Catalog & Detailed Modals
+│   ├── 5.2 Real-Time Pharmacy Cart Management
+│   └── 5.3 Checkout & Simulated Payment Gateway (UPI, Card, NetBanking)
+│
+├── 6.0 Orders & Logistics Tracking System (Horizontal Sliding Architecture)
+│   ├── Pane 1: Current Cart (Items, Subtotal, Checkout Action)
+│   ├── Pane 2: Active Delivery (Live Milestones, Interactive GPS Map, Courier Beacon)
+│   └── Pane 3: Order History Log (Search, Sort, Multi-Status Filtering)
+│
+├── 7.0 Medical Records & Health Vault System (Horizontal Sliding Architecture)
+│   ├── Pane 1: Past Health Assessments
+│   ├── Pane 2: Consultation History & Physician Summaries
+│   └── Pane 3: Encrypted Clinical Document Vault (Upload & Download Tests/Vaccines)
+│
+├── 8.0 Account & Accessibility Management
+│   ├── Profile Details & Emergency Contact Configuration
+│   ├── DPDPA Consent Registry
+│   └── Accessibility Suite (Dark/Light Mode, High Contrast Mode, Dyslexia Mode, Font Scaling)
+│
+└── 9.0 Role-Specific Dashboards
+    ├── 9.1 Doctor Dashboard (Appointment Queue, Triage Review, E-Rx Issuer)
+    ├── 9.2 Pharmacist Dashboard (Order Verification, Dispensing Queue, Inventory)
+    └── 9.3 Delivery Partner Dashboard (Route Allocation, Stage Transition, Proof of Delivery)
+```
+
+### Persistent Navigation Structure
+- **Global Header (Authenticated):**
+  `[Brand Logo: Appie]` ── `[Health Assessment]` ── `[e-Pharmacy]` ── `[Orders]` ── `[e-Prescriptions]` ── `[Records]` ── `[Profile]` ────────── `[Notification Bell]` `[Settings]`
+- **Sub-Navigation within Multi-Section Modules (Assessment, Orders, Records):**
+  Implemented using segmented pill button tabs with real-time active indicators, coupled with touch/scroll snap-points that allow smooth horizontal sliding between functional panes within the same viewport.
+
+---
+
+## Low-Fidelity Wireframes
+
+```
+========================================================================================
+WIRE-01: LANDING PAGE (MINIMAL DISTRACTION-FREE VIEWPORT)
+========================================================================================
++--------------------------------------------------------------------------------------+
+| [Rx Appie]                                                                 [Sign In] |
++--------------------------------------------------------------------------------------+
+|                                                                                      |
+|                               ( * Sparkles Badge * )                                 |
+|                       Next-Generation Healthcare Intelligence                        |
+|                                                                                      |
+|                Your Medical Assistant for Patients and Doctors Alike                 |
+|                                                                                      |
+|   Appie streamlines routine healthcare by uniting intelligent symptom assessment,    |
+|       verified clinician consultations, and doorstep medicine delivery.              |
+|                                                                                      |
+|             [ Get Started as Patient -> ]      [ Join Healthcare Network ]           |
+|                                                                                      |
+|     +--------------------------------------------------------------------------+     |
+|     |  [<]  SLIDING DEMONSTRATION WINDOW: MP4 LIVE CARE WALKTHROUGH        [>] |     |
+|     |       Video Feed: AI Triage -> Video Consult -> Pharmacy Dispatch        |     |
+|     +--------------------------------------------------------------------------+     |
+|                                                                                      |
+|     [ 99.2% Triage Match ]  [ <15m Consult Dispatch ]  [ 100% CDSCO Verified ]       |
++--------------------------------------------------------------------------------------+
+
+========================================================================================
+WIRE-02: HEALTH ASSESSMENT & CONSULTATIONS (DUAL-MODE SLIDING WINDOW)
+========================================================================================
++--------------------------------------------------------------------------------------+
+| [Appie]  Assessment | e-Pharmacy | Orders | e-Prescriptions | Records | Profile (Bell)(Set) |
++--------------------------------------------------------------------------------------+
+|                                                                                      |
+|  [ * 1. Health Assessment * ]     [ 2. Consultations (12) ]                          |
+|                                                                                      |
+|  +--------------------------------------------------------------------------------+  |
+|  | [ Search symptoms by name or body region...                                  ] |  |
+|  | [ + Dry Cough ] [ + Low Fever ] [ + Sore Throat ] [ + Headache ] [ + Nausea ]   |  |
+|  +--------------------------------------------------------------------------------+  |
+|                                                                                      |
+|  ACTIVE SYMPTOMS SELECTED (2):                                                       |
+|  +--------------------------------------------------------------------------------+  |
+|  | Dry Cough          Severity: [ 1 ] [ 2 ] [ (3) ] [ 4 ] [ 5 ]   [ x Remove ]    |  |
+|  | Low Fever (100°F)  Severity: [ 1 ] [ 2 ] [ 3 ] [ (4) ] [ 5 ]   [ x Remove ]    |  |
+|  +--------------------------------------------------------------------------------+  |
+|                                                                                      |
+|  [ Evaluate Symptoms with Medical AI ] ───────────> [ Connect Directly to Doctor ]  |
+|                                                                                      |
+|  ============================== TRIAGE RESULT ====================================   |
+|  | Urgency Level: [ ROUTINE CARE ]                  Calculated Confidence: 94%     |  |
+|  | Primary Consideration: Acute Viral Upper Respiratory Infection                   |  |
+|  | Clinical Summary: Symptoms indicate mild self-limiting viral infection.          |  |
+|  | Recommended OTC: Paracetamol 650mg, Cetirizine 10mg, Warm saline gargles.       |  |
+|  | [ Transfer to Doctor for E-Rx ]          [ Order Recommended OTC to Cart ]      |  |
+|  +--------------------------------------------------------------------------------+  |
++--------------------------------------------------------------------------------------+
+
+========================================================================================
+WIRE-03: ORDERS & DELIVERIES (HORIZONTAL SLIDING SNAP-CONTAINER)
+========================================================================================
++--------------------------------------------------------------------------------------+
+| [Appie]  Assessment | e-Pharmacy | Orders | e-Prescriptions | Records | Profile (Bell)(Set) |
++--------------------------------------------------------------------------------------+
+|  Orders & Deliveries                                                                 |
+|  [ 🛒 1. Current Cart (2) ]  [ 🚚 2. Active Delivery (LIVE) ]  [ 📦 3. History (5) ]  |
+|                                                                           [<] [>]    |
+|  +--------------------------------------------------------------------------------+  |
+|  | <<< HORIZONTALLY SCROLLABLE SNAP WINDOW >>>                                    |  |
+|  |                                                                                |  |
+|  | [ PANE 1: CART ]           [ PANE 2: ACTIVE DISPATCH ]      [ PANE 3: LOG ]    |  |
+|  | • Dolo 650 (x1) - Rs.32    | Order: ORD-2026-9812           | • ORD-9402       |  |
+|  | • Cetzine (x1)  - Rs.21    | Status: [ DELIVERING ]         |   Delivered      |  |
+|  | -----------------------    | Stages: (1)✓ (2)✓ (3)● (4)○    |   Rs. 180.00     |  |
+|  | Subtotal: Rs. 53.00        | [ LIVE GPS MAP CANVAS ]        | • ORD-8819       |  |
+|  | [ Proceed to Checkout ]    | Origin (Pharm) -> 🛵 -> Home   |   Delivered      |  |
+|  |                            | Rider: Arun (+91 97410 99882)  |   Rs. 320.00     |  |
+|  |                            | [ View Full Tracking Log ]     | [ Details ]      |  |
+|  +--------------------------------------------------------------------------------+  |
++--------------------------------------------------------------------------------------+
+
+========================================================================================
+WIRE-04: E-PRESCRIPTION OFFICIAL VIEWER (TAMPER-PROOF CLINICAL MODAL)
+========================================================================================
++--------------------------------------------------------------------------------------+
+|  [X Close]                                                                           |
+|  ℞ APPIE HEALTHCARE • TELEMEDICINE E-PRESCRIPTION                                   |
+|  Doctor: Dr. Ananya Sharma, MBBS, MD (Reg #KMC-48291)         Rx ID: RX-2026-8841    |
+|  Patient: Aditya Verma (Age: 29)                              Date: 09 Nov 2026      |
+|  Diagnosis: Acute Viral Upper Respiratory Infection           Valid: 30 Days         |
+|  ----------------------------------------------------------------------------------  |
+|  PRESCRIBED MEDICINES:                                                               |
+|  1. Dolo 650mg (Paracetamol) ── 1 tab thrice daily after food (1-1-1) ── 5 Days      |
+|  2. Cetzine 10mg (Cetirizine) ── 1 tab at night (0-0-1) ─────────────── 5 Days      |
+|                                                                                      |
+|  ADVICE: Hydration, steam inhalation twice daily. Escalate if fever > 102°F.        |
+|  ----------------------------------------------------------------------------------  |
+|  [✓] Digitally Signed by Dr. Ananya Sharma           [ QrCode: Tamper-Proof Verified ]|
+|  SIG: 7f8a9e2d...e829 (Valid under IT Act 2000 & NMC Guidelines)                     |
+|                                                                                      |
+|  [ 🖨️ Print ] [ ⬇️ Download ] [ 🔗 Share ]    [ 🛒 Order Prescribed Medicines to Cart ]|
++--------------------------------------------------------------------------------------+
+```
+
+---
+
+## Feature Reiteration on Screens
+
+Every screen was reiterated based on user study feedback, heuristic evaluations, and operational edge-cases:
+
+1. **Symptom Entry & Assessment Screen:**
+   - *Initial Concept:* Standard free-text prompt without severity indicators.
+   - *Reiteration:* Added interactive quick-select category pills, real-time tag matching, and an inline 1-to-5 severity selector that directly feeds into the risk stratification model. An instantaneous fallback CTA ("Connect Directly with Doctor") was integrated into the top bar to provide an immediate escape hatch for anxious users.
+2. **Consultation Scheduling Screen:**
+   - *Initial Concept:* Multi-step calendar redirecting to external payment gateways.
+   - *Reiteration:* Integrated slot booking and patient symptom attachment directly inside a unified modal with live clinician availability indicators, slot selectors, and instantaneous dummy payment simulation.
+3. **E-Prescription Viewer Screen:**
+   - *Initial Concept:* Static read-only table of medication names.
+   - *Reiteration:* Upgraded into an official legal digital certificate with tamper-proof cryptographic checksum badges, printable PDF export routines, downloadable text certificates, and an instant "Order Prescribed Medicines to Cart" action that maps medications directly to the pharmacy catalog.
+4. **Orders & Deliveries Screen:**
+   - *Initial Concept:* Three disconnected vertical sections requiring extensive vertical scrolling.
+   - *Reiteration:* Unified into a single horizontal sliding window with snap navigation (`cart` → `active` → `history`), top-level status pills, manual chevron navigation controls, and an interactive simulated GPS map canvas.
+5. **Medical Records & Vault Screen:**
+   - *Initial Concept:* Single chronological list combining all record types.
+   - *Reiteration:* Re-architected into three horizontal panes separating structured AI triage assessments, physician video consult summaries, and an encrypted health vault supporting on-demand document upload and download.
+6. **Authentication & Partner Registration:**
+   - *Initial Concept:* Generic single email login form.
+   - *Reiteration:* Multi-role tabbed interface (Patient, Doctor, Pharmacist, Delivery Partner) featuring 1-click credential demo fills, styled emerald green status badges, and automated session cookie provisioning.
+
+---
+
+## Screen Layouts and Grid Systems
+
+Appie's digital product detailing adheres to an 8-point spatial grid system optimized for modern high-DPI desktop and responsive viewports.
+
+### Breakpoints & Layout Containers
+- **Max Content Container:** `1150px` width, centered with `margin: 0 auto`.
+- **Horizontal Viewport Padding:** Desktop `2rem` (32px), Tablet `1.5rem` (24px), Mobile `1rem` (16px).
+- **Spatial Grid Base:** `8px` increments (4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px).
+- **Card Padding Hierarchy:**
+  - Compact Cards: `1rem` (16px)
+  - Standard Linear Dashboard Cards: `1.25rem 1.5rem` (20px 24px)
+  - Modals & Viewport Containers: `2rem` to `2.25rem` (32px to 36px)
+
+### CSS Grid & Flexbox Structures
+- **Dashboard & Metric Strips:** `display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;`
+- **Linear Feed Cards:** `display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.25rem;`
+- **Horizontal Sliding Window Panes:**
+  ```css
+  .sliding-window-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 2rem;
+    scrollbar-width: thin;
+  }
+  .sliding-pane {
+    min-width: 100%;
+    width: 100%;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+  ```
+
+---
+
+## Typography and Color Specifications
+
+### Typography Hierarchy
+
+The typography scale utilizes modern system-rendered sans-serif typefaces (`Inter`, `Segoe UI`, `-apple-system`, `Roboto`, `sans-serif`) ensuring zero layout-shift, sharp text rendering on all displays, and complete accessibility under dyslexia mode.
+
+| Style Role | Font Size (Desktop) | Line Height | Font Weight | Tracking | Letter Color (Dark Mode) |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Display / Hero H1** | `2.5rem` – `3rem` (40–48px) | 1.15 | 800 (Extra Bold) | `-0.025em` | `var(--text-primary)` (`#f4f4f5`) |
+| **Section Title H2** | `1.85rem` – `2.0rem` (30–32px) | 1.25 | 800 (Bold) | `-0.02em` | `var(--text-primary)` (`#f4f4f5`) |
+| **Card Heading H3** | `1.25rem` – `1.35rem` (20–22px) | 1.35 | 700 (Semi Bold) | `-0.01em` | `var(--text-primary)` (`#f4f4f5`) |
+| **Sub-heading H4** | `1.05rem` – `1.15rem` (17–18px) | 1.4 | 700 (Semi Bold) | `0em` | `var(--text-primary)` (`#f4f4f5`) |
+| **Body Primary** | `0.92rem` – `0.95rem` (15px) | 1.55 | 500 (Regular) | `0em` | `var(--text-secondary)` (`#a1a1aa`) |
+| **Supporting / Meta** | `0.78rem` – `0.85rem` (12–14px) | 1.4 | 500 (Medium) | `+0.01em` | `var(--text-muted)` (`#71717a`) |
+| **Micro Badges / Code**| `0.72rem` – `0.75rem` (11–12px) | 1.2 | 700 / Monospace | `+0.04em` | Semantic Variable |
+
+### Color Specifications & Design Tokens
+
+```
+PRIMARY PALETTE:
+┌─────────────────────────┬─────────────────────────┬─────────────────────────┐
+│ Deep Base (Dark)        │ Card Surface            │ Primary Accent Teal     │
+│ #09090b                 │ #18181b                 │ #0d9488                 │
+│ var(--bg-base)          │ var(--bg-card)          │ var(--color-primary)    │
+└─────────────────────────┴─────────────────────────┴─────────────────────────┘
+
+ACCENT & SEMANTIC PALETTE:
+┌─────────────────────────┬─────────────────────────┬─────────────────────────┐
+│ Warm Amber Gold         │ Clinical Emerald Green  │ Escalation Red          │
+│ #ffb200                 │ #10b981                 │ #ef4444                 │
+│ var(--color-accent)     │ var(--color-success)    │ var(--color-error)      │
+└─────────────────────────┴─────────────────────────┴─────────────────────────┘
+
+HIGH-CONTRAST ACCESSIBILITY OVERRIDE:
+┌─────────────────────────┬─────────────────────────┬─────────────────────────┐
+│ High-Contrast Text      │ High-Contrast Borders   │ High-Contrast Card Bg   │
+│ #ffff22 (Vivid Yellow)  │ #00e5a3 (Cyan / Green)  │ #0d151a (Pure Contrast) │
+└─────────────────────────┴─────────────────────────┴─────────────────────────┘
+```
+
+- **Base Background:** `#09090b` (Deep Near-Black charcoal).
+- **Surface Elevation:** `#111114` (Layer 1), `#18181b` (Card Background).
+- **Borders:** Subtle `#27272a`, Medium `#3f3f46`, Strong `#52525b`.
+- **Brand Teal Accent:** `#0d9488` (Primary brand tone, clinical credibility).
+- **Functional Amber Gold:** `#ffb200` (Call-to-actions, active indicators, ratings).
+- **Semantic Green (Success/Verified):** `#10b981` (Background: `rgba(16, 185, 129, 0.12)`).
+- **Semantic Red (Emergency/Error):** `#ef4444` (Background: `rgba(239, 68, 68, 0.12)`).
+
+---
+
+## Spacing and Sizing Details
+
+### Layout Sizing Constants
+- **Header Height:** `72px` fixed sticky navigation bar with blur backdrop filter (`blur(12px)`).
+- **Interactive Buttons:**
+  - Primary Action CTA: `min-height: 48px; padding: 0 1.5rem; font-size: 0.95rem; font-weight: 700;`
+  - Secondary Action / Filter Buttons: `min-height: 42px; padding: 0 1rem; font-size: 0.88rem; font-weight: 600;`
+  - Compact Action Controls: `min-height: 36px; padding: 0 0.85rem; font-size: 0.8rem;`
+  - Icon Toggle Buttons: `42px × 42px` square with `border-radius: 10px`.
+- **Form Input Fields:** `min-height: 46px; border-radius: 10px; padding: 0 1rem; font-size: 0.92rem; border: 1.5px solid var(--border-subtle);`
+- **Border Radii Hierarchy:**
+  - Micro Tags & Pills: `6px` to `8px`
+  - Input Fields & Action Buttons: `10px` to `12px`
+  - Cards & Sliding Panes: `16px`
+  - Dialog Modals & Showcase Viewports: `20px` to `24px`
+
+---
+
+## Components Used and Their Creation
+
+Appie is engineered with a modular, atomic component hierarchy built with React 19, TypeScript, and Lucide icons:
+
+```
+              ┌────────────────────────────────────────────────┐
+              │           ATOMIC UI COMPONENTS                 │
+              │  (Button, Input, Tag, Badge, IconBox, Divider) │
+              └───────────────────────┬────────────────────────┘
+                                      │
+              ┌───────────────────────▼────────────────────────┐
+              │          MOLECULAR PATTERN UNITS               │
+              │   (SymptomChip, DoctorCard, OrderItemRow,      │
+              │    TimelineMilestone, NotificationBell)        │
+              └───────────────────────┬────────────────────────┘
+                                      │
+              ┌───────────────────────▼────────────────────────┐
+              │          ORGANISM & MODAL MODULES              │
+              │  (PrescriptionViewerModal, OrderTrackingModal, │
+              │   OrderCheckoutModal, LiveMapCanvas, TopBar)   │
+              └───────────────────────┬────────────────────────┘
+                                      │
+              ┌───────────────────────▼────────────────────────┐
+              │          PAGE-LEVEL SLIDING TEMPLATES          │
+              │   (AssessmentView, OrdersSlidingView,          │
+              │    RecordsVaultView, PharmacistDashboard)      │
+              └────────────────────────────────────────────────┘
+```
+
+1. **`PrescriptionViewerModal.tsx`:** Modal rendering a legally compliant NMC e-prescription. Includes dynamic print styling triggers (`window.print()`), automated formatted plain-text and PDF document blob export (`handleDownload`), clipboard link verification sharing (`handleShare`), and cryptographic registry inspection badges.
+2. **`OrderTrackingModal.tsx` & `OrderListComponent.tsx`:** Logistics trackers combining vertical milestone progression with an interactive SVG GPS route canvas. Shows animated courier beacons, origin dispensary tags, delivery destination pins, and demo stage simulation triggers (`handleSimulateAdvance`).
+3. **`OrderCheckoutModal.tsx`:** Simulated payment gateway and address collector. Handles real-time coupon calculation (`APPIE50`), multi-channel payment method switches (UPI, Credit/Debit, NetBanking), and order creation pipeline.
+4. **`MedicalStatusVerificationView.tsx`:** Clinician credential verification center supporting drag-and-drop document upload simulation, registration number auditing, and single-click demo NMC Registry approval triggers (`handleSimulateApproval`).
+5. **`HealthAssessmentAndConsultationView.tsx`:** Multi-tiered triage organism linking searchable symptoms, severity scoring, Gemini AI/rule-based clinical evaluation, and direct specialty doctor discovery.
+6. **`SettingsOverviewView.tsx`:** Preference management hub providing instant reactivity for Dark/Light mode, High Contrast Yellow/Cyan mode, Dyslexia typography mode, and text scaling (`16px`, `17.5px`, `19px`) via `localStorage` and server sync.
+
+---
+
+## Redefining Micro Interactions and Transition Specifications
+
+To avoid abrupt interface shifts and maintain user calm during medical workflows, micro-interactions follow strict physical easing parameters:
+
+- **Standard State Transitions:** `all 200ms cubic-bezier(0.16, 1, 0.3, 1)` applied to button hovers, border color highlights, and pill background shifts.
+- **Card Hover Elevation:**
+  `transform: translateY(-2px); box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.35), 0 0 16px 1px var(--accent-glow);`
+- **Modal Backdrops & Overlays:**
+  `background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px); animation: fadeIn 250ms ease;`
+- **Live Courier Radar Ping:**
+  Pulsing animation on the transit route map beacon using CSS keyframe expansion:
+  `@keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }`
+- **Horizontal Pane Snap-Sliding:**
+  Using CSS scroll snap (`scroll-snap-type: x mandatory; scroll-behavior: smooth`) allowing trackpad gesture translation with zero dropped frames.
+- **Reduced Motion Accessibility Safeguard:**
+  When reduced-motion is toggled, all animation and transition durations are instantly clamped to `0.001ms` via `.reduced-motion *` rules in `globals.css`.
+
+---
+
+## Screen-by-Screen Specifications
+
+### 1. Landing Screen (`/`)
+- **Header:** Minimal header displaying the Appie brand logomark on the left and a quick "Sign In" button with `LogIn` icon on the right.
+- **Hero Section:** Clear title and subtext communicating patient and doctor capabilities, with two primary CTAs: "Get Started as Patient" and "Join Healthcare Network".
+- **Sliding Video Demonstration Showcase:** Horizontally sliding MP4 video viewport presenting live product capabilities (Assessment, Consultation, Pharmacy).
+- **Proof Strip:** Verified Clinicians, CDSCO Sourced Medicines, Express Doorstep Dispatch.
+
+### 2. Authentication Screen (`/login`)
+- **Role Tabs:** Segmented switcher for Patient, Doctor, Pharmacist, and Delivery Partner.
+- **Quick Demo Fill:** 1-click test credentials bar auto-populating email and password for immediate evaluation.
+- **Status Alerts:** Refined emerald green checkmark card with `#10b981` text and soft background confirming successful authentication and automated dashboard redirection.
+
+### 3. Health Assessment Screen (`/assessment`)
+- **Horizontal Mode Switcher:** Pill tabs to alternate between AI Assessment and Doctor Consultations.
+- **Symptom Input:** Live search filter over a clinical catalog, tag picker, and 1-to-5 severity indicator.
+- **Triage Result Display:** Urgency classification banner, clinical differential summary, recommended OTC medications, and direct transfer buttons.
+
+### 4. Orders & Deliveries Screen (`/orders`)
+- **Navigation Controls:** `[ 🛒 1. Current Cart ]` ── `[ 🚚 2. Active Delivery ]` ── `[ 📦 3. Order History ]` with Left/Right chevrons.
+- **Pane 1 (Cart):** Itemized breakdown, quantity modifiers, subtotal, and checkout CTA.
+- **Pane 2 (Active Delivery):** Live 4-stage progression, courier details, and real-time SVG transit map canvas.
+- **Pane 3 (History):** Search bar, sort modal (date, amount), filter modal (ordered, collecting, delivering, delivered, failed), and order item rows.
+
+### 5. Medical Records & Health Vault Screen (`/records`)
+- **Navigation Controls:** `[ ✨ 1. Health Assessments ]` ── `[ 🩺 2. Consultations ]` ── `[ 📁 3. Health Vault ]`.
+- **Pane 1:** Historical AI assessment records with urgency tags and detailed triage modals.
+- **Pane 2:** Historical doctor consultations, appointment times, reasons, payment statuses, and prescription links.
+- **Pane 3:** Document vault listing encrypted files (Blood test, COVID vaccine, X-ray) with direct download actions and an interactive upload modal.
+
+### 6. E-Prescriptions Screen (`/prescriptions`)
+- **Patient View:** List of digitally signed e-prescriptions with validation dates, diagnoses, and "View Official E-Rx" actions.
+- **Doctor View:** Dedicated "Issue New E-Prescription" creator with diagnosis fields, medicine picker, dosage rules, and digital signature sealing.
+- **Modal Viewer:** Tamper-proof verification certificate, print action, text/PDF download, link sharing, and 1-click cart transfer.
+
+### 7. Professional & Partner Dashboards
+- **Doctor Dashboard (`/professional/home`):** Pending consultation queue, triage review, tele-consult launcher, and prescription authoring.
+- **Pharmacist Dashboard (`/pharmacist/home`):** Real-time order dispatch feed, item checklist verification, batch compliance checks, and catalog inventory table.
+- **Delivery Partner Dashboard (`/delivery/home`):** Assigned doorstep deliveries, pickup confirmation, delivery milestone advancing, and proof-of-delivery confirmation.
+
+---
+
+## High-Fidelity Interactive Prototype
+
+The high-fidelity interactive prototype of Appie is fully realized as a production Next.js 16 web application running with responsive client-side hydration, server components, and active API routing:
+
+- **Live Repository:** [GitHub - RishikNatra/Appie](https://github.com/RishikNatra/Appie)
+- **Local Prototype Execution:**
+  ```bash
+  # 1. Clone repository
+  git clone https://github.com/RishikNatra/Appie.git
+  cd Appie
+
+  # 2. Install dependencies
+  npm install
+
+  # 3. Launch interactive development prototype
+  npm run dev
+  # Access live prototype at http://localhost:3000
+  ```
+- **Demo Interactive Personas (1-Click Authenticated in Login):**
+  - **Patient Persona:** `patient@appie.health` / `Password123!` (Full assessment, cart checkout, horizontal orders & records)
+  - **Doctor Persona:** `doctor@appie.health` / `Password123!` (Review triage, issue digital e-prescriptions, simulate NMC credential verification)
+  - **Pharmacist Persona:** `pharmacist@appie.health` / `Password123!` (Inspect incoming pharmacy dispatches, verify medicine batches)
+  - **Delivery Partner Persona:** `delivery@appie.health` / `Password123!` (Advance live package milestones from transit to delivered)
+
+---
+
+## Cognitive Walkthrough and Comparison with Existing Product and Show How Better It Is
+
+### Cognitive Walkthrough (CW) Methodology & Persona
+A systematic cognitive walkthrough was conducted evaluating the primary user persona: **Aditya, a 29-year-old software engineer in Bengaluru suffering from acute headache, fever (100.8°F), and mild cough during a demanding work sprint.**
+
+The walkthrough assesses four core questions for each user action step:
+1. *Will the user try to achieve the right effect?*
+2. *Will the user notice that the correct action is available?*
+3. *Will the user associate the correct action with the effect they are trying to achieve?*
+4. *If the correct action is performed, will the user see that progress is being made toward their goal?*
+
+#### Step-by-Step Cognitive Walkthrough Analysis
+
+| User Task Step | User Intent & Goal | Action Performed | System Feedback & Progress Cue | Cognitive Walkthrough Assessment |
+| :--- | :--- | :--- | :--- | :--- |
+| **Step 1: Symptom Intake** | Document illness without typing essays | Enters "cough" in search; clicks "Dry Cough" and sets Severity to 3 | Chip animates into selected tray with highlighted severity score | **Success:** Zero ambiguity; quick-select chips eliminate typing effort under fever. |
+| **Step 2: AI Triage Review** | Understand if illness is dangerous | Clicks "Evaluate Symptoms with Medical AI" | Immediate status badge displays "ROUTINE CARE" with clinical summary | **Success:** Visceral anxiety eliminated; clear next steps visible within 2 seconds. |
+| **Step 3: Clinician Consultation** | Obtain verified doctor advice | Clicks "Transfer to Consultation" | Automatically filters doctors by General Medicine; selects slot | **Success:** Doctor's credentials and NMC registration prominently displayed, establishing trust. |
+| **Step 4: E-Prescription Delivery** | View legal prescription | Receives notification; opens E-Prescription viewer | Formatted Rx displayed with doctor's signature and NMC seal | **Success:** User immediately recognizes valid legal document; zero waiting. |
+| **Step 5: Medication Fulfillment** | Get prescribed medicine delivered | Clicks "Order Prescribed Medicines to Cart" then "Proceed to Checkout" | Cart transfers automatically; orders window smoothly slides to Active Delivery | **Success:** Zero re-entry of drug names; simulated payment completes in 1 click. |
+| **Step 6: Live Transit Tracking** | Know exact arrival time | Views active pane on Orders page | Interactive GPS route displays live courier icon 5 mins away | **Success:** Complete transparency from intake to physical delivery. |
+
+---
+
+### Comparative Evaluation: Appie vs. Existing Market Alternatives
+
+```
+HEALTHCARE PROCESS COMPLETION (CLOSED-LOOP BENCHMARK):
+┌────────────────────┬───────────┬──────────────┬─────────────┬─────────────┐
+│ Workflow Stage     │ Appie     │ Practo       │ Tata 1mg    │ Apollo 24|7 │
+├────────────────────┼───────────┼──────────────┼─────────────┼─────────────┤
+│ 1. AI Symptom      │ ✓ Core    │ ✗ None       │ ◐ Fragmented│ ◐ Generic   │
+│    Triage & Scoring│ (Instant) │              │   Search Bot│   Question  │
+├────────────────────┼───────────┼──────────────┼─────────────┼─────────────┤
+│ 2. Clinician Gate  │ ✓ Built-in│ ✓ Video Only │ ✓ Telehealth│ ✓ Telehealth│
+│    Verification    │ Mandatory │   Manual     │   Manual    │   Manual    │
+├────────────────────┼───────────┼──────────────┼─────────────┼─────────────┤
+│ 3. 1-Click Rx to   │ ✓ Instant │ ✗ Disconnect │ ◐ Manual Rx │ ◐ Re-upload │
+│    Pharmacy Cart   │   Transfer│   Re-upload  │   Search    │   Required  │
+├────────────────────┼───────────┼──────────────┼─────────────┼─────────────┤
+│ 4. Doorstep Transit│ ✓ Live GPS│ ✗ Third-Party│ ✓ Delayed   │ ✓ Courier   │
+│    Tracking        │   Map Sim │   Courier    │   Tracking  │   Updates   │
+├────────────────────┼───────────┼──────────────┼─────────────┼─────────────┤
+│ 5. UX Architecture │ ✓ Single  │ ✗ Deeply     │ ✗ Cluttered │ ✗ Heavy Ad  │
+│    & Accessibility │ Horizontal│   Nested     │   Commercial│   Banners & │
+│                    │   Window  │   Menus      │   Storefront│   Promos    │
+└────────────────────┴───────────┴──────────────┴─────────────┴─────────────┘
+```
+
+### Detailed Competitive Differentiators: How Appie is Substantially Better
+
+1. **Closed-Loop Unity vs. Broken Silos:**
+   - *Existing Products (Practo, 1mg, Apollo):* Treat consultations, diagnostic lab orders, and pharmacy sales as disjointed commercial business units. A user consulting a doctor on Practo receives a static PDF and must independently open a pharmacy app, search for each medication, decipher doctor abbreviations, or wait for manual prescription digitizers.
+   - *Appie Advantage:* Connects the entire journey into an unbroken continuum. A doctor's issued prescription features an instant `[Order Prescribed Medicines to Cart]` button that maps verified dosages straight to local pharmacy inventory, routing directly into checkout in one click.
+2. **Clinical Accountability vs. Black-Box AI Bots:**
+   - *Existing Products:* Either lack symptom assessment entirely (forcing users to guess whether they need an ENT, Pulmonologist, or GP), or deploy generic chatbots that offer vague disclaimers without clinical backing.
+   - *Appie Advantage:* Pairs intelligent AI symptom risk-scoring with a mandatory human clinician review gate. The user receives immediate preliminary peace-of-mind, while legal prescription generation remains strictly accountable to verified NMC-registered medical practitioners.
+3. **Calm, High-Efficiency Product UX vs. Aggressive Commercial Clutter:**
+   - *Existing Products:* Overwhelmed with promotional discounts, lab test upsells, sponsored hospital banners, and cosmetic wellness products that induce visual stress during acute illness.
+   - *Appie Advantage:* Employs a restrained, distraction-free aesthetic with an ambient dark palette, generous whitespace, zero commercial advertising banners, and single-window horizontal sliding panes that keep the patient focused exclusively on recovery.
+4. **Inclusive Neurodiversity & Visual Accessibility:**
+   - *Existing Products:* Standard interfaces with no contrast adjustments, fixed low-contrast font sizes, and dense blocks of text that alienate users with visual impairments or reading difficulties.
+   - *Appie Advantage:* First-in-class integrated accessibility suite featuring a vibrant **High Contrast Mode** (Yellow `#ffff22` text on vivid Cyan/Green `#00e5a3` borders) and a specialized **Dyslexia Mode** enforcing uniform dyslexia-friendly typography and consistent stroke weight throughout the application.
