@@ -63,6 +63,9 @@ export default function MedicationsPage() {
   };
 
   const handleUpdateQuantity = async (cartItemId: string, quantity: number) => {
+    if (quantity <= 0) {
+      return handleRemoveItem(cartItemId);
+    }
     try {
       const res = await fetch("/api/medications/cart", {
         method: "PATCH",
@@ -77,7 +80,7 @@ export default function MedicationsPage() {
 
   const handleRemoveItem = async (cartItemId: string) => {
     try {
-      const res = await fetch(`/api/medications/cart?cartItemId=${cartItemId}`, {
+      const res = await fetch(`/api/medications/cart?cartItemId=${encodeURIComponent(cartItemId)}`, {
         method: "DELETE",
       });
       if (res.ok) fetchCart();
@@ -88,7 +91,7 @@ export default function MedicationsPage() {
 
   const handleClearCart = async () => {
     try {
-      const res = await fetch("/api/medications/cart?clear=all", {
+      const res = await fetch("/api/medications/cart?clearAll=true", {
         method: "DELETE",
       });
       if (res.ok) fetchCart();

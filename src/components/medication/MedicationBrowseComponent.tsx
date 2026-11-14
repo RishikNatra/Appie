@@ -316,7 +316,7 @@ export default function MedicationBrowseComponent({
                 >
                   {/* Price */}
                   <div style={{ fontSize: "1.4rem", fontWeight: 800, color: "var(--text-primary)" }}>
-                    ₹{med.price.toFixed(2)}
+                    ₹{Number(med.price || 0).toFixed(2)}
                   </div>
 
                   {/* Out of Stock Behavior strictly as instructed:

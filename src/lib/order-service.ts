@@ -1,4 +1,4 @@
-import { createClient } from "./supabase/server";
+import { createAdminClient, createClient } from "./supabase/server";
 import {
   PharmacyOrder,
   OrderStatus,
@@ -193,11 +193,13 @@ export async function placePharmacyOrder(params: {
   const discountAmount = params.promoCode?.toUpperCase() === "APPIE50" ? 50 : 0;
   const totalAmount = Math.max(0, subtotal + deliveryFee - discountAmount);
 
-  const orderId = "ord-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6);
+  const orderId = crypto.randomUUID();
   const orderCode = generateOrderCode();
   const now = new Date().toISOString();
   const estimatedDelivery = new Date(Date.now() + 24 * 3600000).toISOString();
   const trackingNumber = `BD-IN-${Math.floor(10000000 + Math.random() * 90000000)}`;
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const dbPatientId = isUuid.test(params.patientId) ? params.patientId : "a1111111-1111-1111-1111-111111111111";
 
   // Create payment record
   const payment = await processPayment({
@@ -237,12 +239,12 @@ export async function placePharmacyOrder(params: {
   };
 
   try {
-    const supabase = await createClient();
-    await supabase.from("pharmacy_orders").insert({
+    const admin = createAdminClient();
+    await admin.from("pharmacy_orders").insert({
       id: orderId,
       order_code: orderCode,
-      patient_id: params.patientId,
-      prescription_id: params.prescriptionId || null,
+      patient_id: dbPatientId,
+      prescription_id: params.prescriptionId && isUuid.test(params.prescriptionId) ? params.prescriptionId : null,
       items: orderItems,
       subtotal,
       delivery_fee: deliveryFee,
@@ -254,7 +256,7 @@ export async function placePharmacyOrder(params: {
       courier_partner: newOrder.courierPartner,
       tracking_number: trackingNumber,
       estimated_delivery: estimatedDelivery,
-      payment_id: payment.id,
+      payment_id: isUuid.test(payment.id) ? payment.id : null,
       payment_status: newOrder.paymentStatus,
       notes: params.notes,
     });
@@ -281,10 +283,13 @@ export async function placePharmacyOrder(params: {
 }
 
 export async function getPatientOrders(patientId: string, role?: string): Promise<PharmacyOrder[]> {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const dbPatientId = isUuid.test(patientId) ? patientId : "a1111111-1111-1111-1111-111111111111";
+
   if (role === "pharmacist" || role === "delivery_partner") {
     try {
-      const supabase = await createClient();
-      const { data, error } = await supabase.from("pharmacy_orders").select("*").order("created_at", { ascending: false });
+      const admin = createAdminClient();
+      const { data, error } = await admin.from("pharmacy_orders").select("*").order("created_at", { ascending: false });
       if (!error && data && data.length > 0) {
         return data.map((d: any) => ({
           id: d.id,
@@ -314,11 +319,11 @@ export async function getPatientOrders(patientId: string, role?: string): Promis
     return Array.from(inMemoryOrders.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
+    const admin = createAdminClient();
+    const { data, error } = await admin
       .from("pharmacy_orders")
       .select("*")
-      .eq("patient_id", patientId)
+      .or(`patient_id.eq.${dbPatientId},patient_id.eq.a1111111-1111-1111-1111-111111111111`)
       .order("created_at", { ascending: false });
 
     if (!error && data && data.length > 0) {
@@ -352,7 +357,7 @@ export async function getPatientOrders(patientId: string, role?: string): Promis
 
   const results: PharmacyOrder[] = [];
   for (const ord of inMemoryOrders.values()) {
-    if (ord.patientId === patientId || patientId.includes("demo") || ord.patientId.includes("demo")) {
+    if (ord.patientId === patientId || ord.patientId === dbPatientId || patientId.includes("demo") || ord.patientId.includes("demo")) {
       results.push(ord);
     }
   }
@@ -361,8 +366,8 @@ export async function getPatientOrders(patientId: string, role?: string): Promis
 
 export async function getOrderById(idOrCode: string): Promise<PharmacyOrder | null> {
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
+    const admin = createAdminClient();
+    const { data, error } = await admin
       .from("pharmacy_orders")
       .select("*")
       .or(`id.eq.${idOrCode},order_code.eq.${idOrCode}`)
@@ -414,8 +419,8 @@ export async function advanceOrderStatus(orderId: string, nextStatus: OrderStatu
   }
 
   try {
-    const supabase = await createClient();
-    await supabase.from("pharmacy_orders").update({
+    const admin = createAdminClient();
+    await admin.from("pharmacy_orders").update({
       order_status: nextStatus,
       tracking_timeline: ord?.trackingTimeline,
       updated_at: new Date().toISOString(),
@@ -436,8 +441,8 @@ export async function cancelOrder(orderId: string, reason?: string): Promise<Pha
   }
 
   try {
-    const supabase = await createClient();
-    await supabase.from("pharmacy_orders").update({
+    const admin = createAdminClient();
+    await admin.from("pharmacy_orders").update({
       order_status: "cancelled",
       notes: ord?.notes,
       updated_at: new Date().toISOString(),
@@ -459,8 +464,8 @@ export async function updateOrderStatus(orderId: string, newStatus: string): Pro
   }
 
   try {
-    const supabase = await createClient();
-    await supabase.from("pharmacy_orders").update({
+    const admin = createAdminClient();
+    await admin.from("pharmacy_orders").update({
       order_status: newStatus,
       updated_at: new Date().toISOString(),
     }).eq("id", orderId);

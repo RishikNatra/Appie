@@ -217,7 +217,7 @@ export default function MedicationCartComponent({
                 {item.medication.genericName}
               </p>
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                ₹{item.medication.price.toFixed(2)} per pack
+                ₹{Number(item.medication?.price || 0).toFixed(2)} per pack
               </p>
             </div>
 
@@ -269,7 +269,7 @@ export default function MedicationCartComponent({
 
               <div style={{ textAlign: "right", minWidth: "80px" }}>
                 <div style={{ fontSize: "1.15rem", fontWeight: 800, color: "var(--color-accent)" }}>
-                  ₹{(item.medication.price * item.quantity).toFixed(2)}
+                  ₹{(Number(item.medication?.price || 0) * item.quantity).toFixed(2)}
                 </div>
               </div>
 
@@ -314,7 +314,7 @@ export default function MedicationCartComponent({
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", fontSize: "0.88rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--text-secondary)" }}>Items Subtotal</span>
-              <span>₹{subtotal.toFixed(2)}</span>
+              <span>₹{Number(subtotal || 0).toFixed(2)}</span>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -323,14 +323,14 @@ export default function MedicationCartComponent({
                 {deliveryFee === 0 ? (
                   <strong style={{ color: "var(--color-success)" }}>FREE</strong>
                 ) : (
-                  `₹${deliveryFee.toFixed(2)}`
+                  `₹${Number(deliveryFee || 0).toFixed(2)}`
                 )}
               </span>
             </div>
 
             {deliveryFee > 0 && (
               <span style={{ fontSize: "0.75rem", color: "var(--color-accent)" }}>
-                Add ₹{(freeDeliveryThreshold - subtotal).toFixed(2)} more for FREE delivery!
+                Add ₹{Number(Math.max(0, freeDeliveryThreshold - subtotal)).toFixed(2)} more for FREE delivery!
               </span>
             )}
 
@@ -350,7 +350,7 @@ export default function MedicationCartComponent({
               }}
             >
               <span>Total Amount</span>
-              <span style={{ color: "var(--color-accent)" }}>₹{total.toFixed(2)}</span>
+              <span style={{ color: "var(--color-accent)" }}>₹{Number(total || 0).toFixed(2)}</span>
             </div>
           </div>
 
@@ -376,7 +376,7 @@ export default function MedicationCartComponent({
             className="btn-primary"
             style={{ minHeight: "48px", width: "100%", fontSize: "0.95rem" }}
           >
-            Proceed to Order (₹{total.toFixed(2)})
+            Proceed to Order (₹{Number(total || 0).toFixed(2)})
           </button>
 
           <button

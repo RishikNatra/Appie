@@ -369,7 +369,7 @@ export interface MedicationItem {
   genericName: string;
   brandName?: string;
   category: MedicationCategory;
-  dosageForm: "Tablet" | "Capsule" | "Syrup" | "Ointment" | "Drops" | "Inhaler";
+  dosageForm: "Tablet" | "Capsule" | "Syrup" | "Ointment" | "Drops" | "Inhaler" | "Gel" | "Nasal Spray" | "Spray";
   strength: string;
   packSize: string;
   price: number; // INR

@@ -26,7 +26,7 @@ export const demoUsers: Map<string, { user: AuthUser; passwordHash: string }> = 
     "patient@appie.health",
     {
       user: {
-        id: "demo-patient-001",
+        id: "a1111111-1111-1111-1111-111111111111",
         email: "patient@appie.health",
         username: "demo_patient",
         role: "patient",
@@ -40,7 +40,7 @@ export const demoUsers: Map<string, { user: AuthUser; passwordHash: string }> = 
     "doctor@appie.health",
     {
       user: {
-        id: "demo-doctor-001",
+        id: "b2222222-2222-2222-2222-222222222222",
         email: "doctor@appie.health",
         username: "dr_sharma",
         role: "health_professional",
@@ -54,7 +54,7 @@ export const demoUsers: Map<string, { user: AuthUser; passwordHash: string }> = 
     "pharmacist@appie.health",
     {
       user: {
-        id: "demo-pharmacist-001",
+        id: "c5555555-5555-5555-5555-555555555555",
         email: "pharmacist@appie.health",
         username: "medplus_pharma",
         role: "pharmacist",
@@ -68,7 +68,7 @@ export const demoUsers: Map<string, { user: AuthUser; passwordHash: string }> = 
     "delivery@appie.health",
     {
       user: {
-        id: "demo-delivery-001",
+        id: "d6666666-6666-6666-6666-666666666666",
         email: "delivery@appie.health",
         username: "swift_delivery",
         role: "delivery_partner",

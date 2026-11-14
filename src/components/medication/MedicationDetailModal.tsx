@@ -130,7 +130,7 @@ export default function MedicationDetailModal({
               MRP (inclusive of taxes)
             </span>
             <span style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--color-accent)" }}>
-              ₹{medication.price.toFixed(2)}
+              ₹{Number(medication.price || 0).toFixed(2)}
             </span>
             <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block" }}>
               Per {medication.packSize}
@@ -267,7 +267,7 @@ export default function MedicationDetailModal({
               style={{ minHeight: "48px", padding: "0 1.5rem" }}
             >
               <ShoppingCart size={17} />
-              <span>Add to Cart (₹{(medication.price * quantity).toFixed(2)})</span>
+              <span>Add to Cart (₹{(Number(medication.price || 0) * quantity).toFixed(2)})</span>
             </button>
           </div>
         </div>

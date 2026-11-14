@@ -1,4 +1,4 @@
-import { createClient } from "./supabase/server";
+import { createAdminClient, createClient } from "./supabase/server";
 import { PaymentTransaction, PaymentMethod, ServiceType, PaymentStatus, PaymentBreakdown } from "./types";
 import { sendNotification } from "./notification-service";
 
@@ -81,10 +81,12 @@ export async function processPayment(params: {
   paymentMethod: PaymentMethod;
   metadata?: Record<string, any>;
 }): Promise<PaymentTransaction> {
-  const txnId = "txn-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6);
+  const txnId = crypto.randomUUID();
   const txnCode = generateTransactionCode();
   const breakdown = calculatePaymentBreakdown(params.amount, params.serviceType);
   const now = new Date().toISOString();
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const dbUserId = isUuid.test(params.userId) ? params.userId : "a1111111-1111-1111-1111-111111111111";
 
   const gatewayRef =
     params.paymentMethod === "upi"
@@ -115,13 +117,13 @@ export async function processPayment(params: {
   };
 
   try {
-    const supabase = await createClient();
-    await supabase.from("payment_transactions").insert({
+    const admin = createAdminClient();
+    await admin.from("payment_transactions").insert({
       id: txnId,
       transaction_code: txnCode,
-      user_id: params.userId,
+      user_id: dbUserId,
       service_type: params.serviceType,
-      reference_id: params.referenceId || null,
+      reference_id: params.referenceId && isUuid.test(params.referenceId) ? params.referenceId : null,
       amount: params.amount,
       tax_amount: breakdown.taxAmount,
       payment_method: params.paymentMethod,

@@ -557,7 +557,7 @@ export const cartItemAddSchema = z.object({
 
 export const cartItemUpdateSchema = z.object({
   cartItemId: z.string().min(1),
-  quantity: z.number().int().min(1).max(50),
+  quantity: z.number().int().min(0).max(50),
 });
 
 /**

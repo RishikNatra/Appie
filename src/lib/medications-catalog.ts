@@ -1,5 +1,60 @@
 import { MedicationItem, MedicationCategory } from "./types";
 
+export const MEDICATION_UUID_MAP: Record<string, string> = {
+  "e0000000-0000-0000-0000-000000000001": "med-paracetamol-650",
+  "e0000000-0000-0000-0000-000000000002": "med-ibuprofen-paracetamol",
+  "e0000000-0000-0000-0000-000000000003": "med-tramadol-paracetamol",
+  "e0000000-0000-0000-0000-000000000004": "med-cetirizine-10",
+  "e0000000-0000-0000-0000-000000000005": "med-ascoril-d-syrup",
+  "e0000000-0000-0000-0000-000000000006": "med-amoxicillin-clavulanate",
+  "e0000000-0000-0000-0000-000000000007": "med-pantoprazole-40",
+  "e0000000-0000-0000-0000-000000000008": "med-gelusil-liquid",
+  "e0000000-0000-0000-0000-000000000009": "med-azithromycin-500",
+  "e0000000-0000-0000-0000-000000000010": "med-allegra-120",
+  "e0000000-0000-0000-0000-000000000011": "med-telmisartan-40",
+  "e0000000-0000-0000-0000-000000000012": "med-metformin-500",
+  "e0000000-0000-0000-0000-000000000013": "med-neurobion-forte",
+  "e0000000-0000-0000-0000-000000000014": "med-calcium-vitamin-d3",
+  "e0000000-0000-0000-0000-000000000015": "med-becosules-capsules",
+  "e0000000-0000-0000-0000-000000000016": "med-otrivin-spray",
+  "e0000000-0000-0000-0000-000000000017": "med-volini-gel",
+  "e0000000-0000-0000-0000-000000000018": "med-digene-gel",
+  "e0000000-0000-0000-0000-000000000019": "med-sinarest-tab",
+  "e0000000-0000-0000-0000-000000000020": "med-levocetirizine-montelukast",
+};
+
+export const MEDICATION_SLUG_TO_UUID: Record<string, string> = {
+  "med-paracetamol-650": "e0000000-0000-0000-0000-000000000001",
+  "med-ibuprofen-paracetamol": "e0000000-0000-0000-0000-000000000002",
+  "med-tramadol-paracetamol": "e0000000-0000-0000-0000-000000000003",
+  "med-cetirizine-10": "e0000000-0000-0000-0000-000000000004",
+  "med-ascoril-d-syrup": "e0000000-0000-0000-0000-000000000005",
+  "med-amoxicillin-clavulanate": "e0000000-0000-0000-0000-000000000006",
+  "med-pantoprazole-40": "e0000000-0000-0000-0000-000000000007",
+  "med-gelusil-liquid": "e0000000-0000-0000-0000-000000000008",
+  "med-azithromycin-500": "e0000000-0000-0000-0000-000000000009",
+  "med-allegra-120": "e0000000-0000-0000-0000-000000000010",
+  "med-telmisartan-40": "e0000000-0000-0000-0000-000000000011",
+  "med-metformin-500": "e0000000-0000-0000-0000-000000000012",
+  "med-neurobion-forte": "e0000000-0000-0000-0000-000000000013",
+  "med-calcium-vitamin-d3": "e0000000-0000-0000-0000-000000000014",
+  "med-becosules-capsules": "e0000000-0000-0000-0000-000000000015",
+  "med-otrivin-spray": "e0000000-0000-0000-0000-000000000016",
+  "med-volini-gel": "e0000000-0000-0000-0000-000000000017",
+  "med-digene-gel": "e0000000-0000-0000-0000-000000000018",
+  "med-sinarest-tab": "e0000000-0000-0000-0000-000000000019",
+  "med-levocetirizine-montelukast": "e0000000-0000-0000-0000-000000000020",
+  "med-benadryl-syrup": "e0000000-0000-0000-0000-000000000016",
+  "med-vitamin-c-zinc": "e0000000-0000-0000-0000-000000000015",
+};
+
+export function resolveMedicationUuid(id: string): string {
+  if (!id) return "e0000000-0000-0000-0000-000000000001";
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (uuidRegex.test(id)) return id;
+  return MEDICATION_SLUG_TO_UUID[id] || "e0000000-0000-0000-0000-000000000001";
+}
+
 export const MEDICATIONS_CATALOG: MedicationItem[] = [
   // FEVER & PAIN (OTC & Rx)
   {
@@ -53,6 +108,23 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     inStock: true,
     manufacturer: "Janssen Pharmaceuticals",
   },
+  {
+    id: "med-volini-gel",
+    name: "Volini Pain Relief Gel",
+    genericName: "Diclofenac Diethylamine + Linseed Oil + Menthol",
+    brandName: "Sun Pharma",
+    category: "fever_pain",
+    dosageForm: "Gel",
+    strength: "Topical Gel",
+    packSize: "50 g tube",
+    price: 155.0,
+    prescriptionRequired: false,
+    usageInstructions: "Apply 3-4 times daily with gentle massage on the affected muscular or joint area.",
+    safetyWarnings: "For external use only. Do not apply on open cuts, wounds, or eyes.",
+    sideEffects: ["Skin redness", "Mild burning sensation"],
+    inStock: true,
+    manufacturer: "Sun Pharmaceutical Industries",
+  },
 
   // COLD & COUGH
   {
@@ -64,7 +136,7 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     dosageForm: "Tablet",
     strength: "10 mg",
     packSize: "Strip of 10 tablets",
-    price: 21.0,
+    price: 42.0,
     prescriptionRequired: false,
     usageInstructions: "Take 1 tablet once daily, preferably at bedtime.",
     safetyWarnings: "May cause mild sedation. Avoid alcohol during treatment.",
@@ -73,21 +145,72 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     manufacturer: "Dr. Reddy's Laboratories",
   },
   {
+    id: "med-ascoril-d-syrup",
+    name: "Ascoril-D Plus Syrup",
+    genericName: "Dextromethorphan + Phenylephrine + Chlorpheniramine",
+    brandName: "Glenmark",
+    category: "cold_cough",
+    dosageForm: "Syrup",
+    strength: "100 ml bottle",
+    packSize: "100 ml bottle",
+    price: 135.0,
+    prescriptionRequired: false,
+    usageInstructions: "Take 10ml (2 teaspoons) three times daily for dry, irritating cough.",
+    safetyWarnings: "Not suitable for productive cough with excessive phlegm.",
+    sideEffects: ["Mild dizziness", "Nausea", "Restlessness"],
+    inStock: true,
+    manufacturer: "Glenmark Pharmaceuticals",
+  },
+  {
+    id: "med-sinarest-tab",
+    name: "Sinarest Tablet",
+    genericName: "Paracetamol + Phenylephrine + Chlorpheniramine Maleate",
+    brandName: "Centaur",
+    category: "cold_cough",
+    dosageForm: "Tablet",
+    strength: "Composite formula",
+    packSize: "Strip of 10 tablets",
+    price: 72.0,
+    prescriptionRequired: false,
+    usageInstructions: "Take 1 tablet every 8 hours after food for relief from head cold, fever, and sinus congestion.",
+    safetyWarnings: "Avoid concurrent consumption with other paracetamol products or sedatives.",
+    sideEffects: ["Drowsiness", "Dry mouth"],
+    inStock: true,
+    manufacturer: "Centaur Pharmaceuticals",
+  },
+  {
+    id: "med-otrivin-spray",
+    name: "Otrivin Oxy Fast Relief",
+    genericName: "Oxymetazoline Hydrochloride 0.05%",
+    brandName: "GSK Consumer",
+    category: "cold_cough",
+    dosageForm: "Nasal Spray",
+    strength: "0.05%",
+    packSize: "10 ml spray bottle",
+    price: 115.0,
+    prescriptionRequired: false,
+    usageInstructions: "Administer 1-2 sprays into each nostril up to twice daily for blocked nose.",
+    safetyWarnings: "Do not use continuously for more than 7 consecutive days (rebound congestion risk).",
+    sideEffects: ["Local nasal burning", "Dryness", "Sneezing"],
+    inStock: true,
+    manufacturer: "Haleon / GlaxoSmithKline",
+  },
+  {
     id: "med-levocetirizine-montelukast",
-    name: "Montair LC",
-    genericName: "Levocetirizine 5mg + Montelukast 10mg",
+    name: "Montair-LC",
+    genericName: "Montelukast 10mg + Levocetirizine 5mg",
     brandName: "Cipla",
     category: "cold_cough",
     dosageForm: "Tablet",
-    strength: "5mg / 10mg",
+    strength: "10mg / 5mg",
     packSize: "Strip of 10 tablets",
-    price: 185.0,
+    price: 188.0,
     prescriptionRequired: true,
-    usageInstructions: "Take 1 tablet at night for allergic rhinitis and chronic bronchial allergies.",
-    safetyWarnings: "Monitor for neuropsychiatric changes. Inform doctor if mood alterations occur.",
-    sideEffects: ["Headache", "Somnolence", "Upper respiratory tract infection symptoms"],
+    usageInstructions: "Take 1 tablet once daily in the evening for allergic rhinitis and chronic asthma prevention.",
+    safetyWarnings: "Schedule H prescription medicine. Monitor mood and neuropsychiatric changes.",
+    sideEffects: ["Headache", "Somnolence", "Dry mouth"],
     inStock: true,
-    manufacturer: "Cipla Healthcare",
+    manufacturer: "Cipla Limited",
   },
   {
     id: "med-benadryl-syrup",
@@ -126,6 +249,40 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     manufacturer: "Alkem Laboratories",
   },
   {
+    id: "med-gelusil-liquid",
+    name: "Gelusil MPS Liquid",
+    genericName: "Aluminium Hydroxide + Magnesium Hydroxide + Simethicone",
+    brandName: "Pfizer India",
+    category: "digestive",
+    dosageForm: "Syrup",
+    strength: "200 ml bottle",
+    packSize: "200 ml bottle",
+    price: 142.0,
+    prescriptionRequired: false,
+    usageInstructions: "Take 10-20ml (2-4 teaspoons) after meals and at bedtime for acidity and heartburn.",
+    safetyWarnings: "Maintain a 2-hour interval between antacids and other prescription medications.",
+    sideEffects: ["Chalky taste", "Mild laxative effect"],
+    inStock: true,
+    manufacturer: "Pfizer Consumer Healthcare",
+  },
+  {
+    id: "med-digene-gel",
+    name: "Digene Gel Orange",
+    genericName: "Magnesium Hydroxide + Simethicone + Sodium Carboxymethylcellulose",
+    brandName: "Abbott",
+    category: "digestive",
+    dosageForm: "Syrup",
+    strength: "Antacid Gel",
+    packSize: "200 ml bottle",
+    price: 145.0,
+    prescriptionRequired: false,
+    usageInstructions: "Shake well before use. Take 2 teaspoons (10ml) after meals for quick relief from acidity.",
+    safetyWarnings: "Sugar-free formulation suitable for diabetic patients.",
+    sideEffects: ["Mild laxative effect", "Chalky taste"],
+    inStock: true,
+    manufacturer: "Abbott India Ltd",
+  },
+  {
     id: "med-domperidone-rabeprazole",
     name: "Razo-D",
     genericName: "Rabeprazole 20mg + Domperidone 30mg SR",
@@ -148,7 +305,7 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     genericName: "WHO Recommended ORS Formulation",
     brandName: "FDC Ltd",
     category: "digestive",
-    dosageForm: "Syrup", // Powder solution
+    dosageForm: "Syrup",
     strength: "21.8 g sachet",
     packSize: "Pack of 5 sachets",
     price: 45.0,
@@ -170,10 +327,10 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     dosageForm: "Tablet",
     strength: "120 mg",
     packSize: "Strip of 10 tablets",
-    price: 198.0,
+    price: 215.0,
     prescriptionRequired: false,
     usageInstructions: "Take 1 tablet once daily before meals with water. Non-drowsy formulation.",
-    safetyWarnings: "Avoid drinking fruit juices (apple, orange, grapefruit) within 4 hours of dosing as it reduces absorption.",
+    safetyWarnings: "Avoid drinking fruit juices within 4 hours of dosing as it reduces absorption.",
     sideEffects: ["Nausea", "Headache", "Dizziness (rare)"],
     inStock: true,
     manufacturer: "Sanofi India Ltd",
@@ -217,6 +374,57 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
 
   // VITAMINS & SUPPLEMENTS
   {
+    id: "med-neurobion-forte",
+    name: "Neurobion Forte",
+    genericName: "Vitamin B-Complex + Vitamin B12",
+    brandName: "Procter & Gamble",
+    category: "vitamins_supplements",
+    dosageForm: "Tablet",
+    strength: "Standard Complex",
+    packSize: "Strip of 30 tablets",
+    price: 42.5,
+    prescriptionRequired: false,
+    usageInstructions: "Take 1 tablet daily after lunch for nerve health and dietary supplementation.",
+    safetyWarnings: "Harmless yellow discoloration of urine may occur due to riboflavin.",
+    sideEffects: ["Mild gastric upset"],
+    inStock: true,
+    manufacturer: "P&G Health Ltd",
+  },
+  {
+    id: "med-calcium-vitamin-d3",
+    name: "Shelcal 500",
+    genericName: "Calcium 500mg + Vitamin D3 250 IU",
+    brandName: "Torrent Pharma",
+    category: "vitamins_supplements",
+    dosageForm: "Tablet",
+    strength: "500 mg",
+    packSize: "Strip of 15 tablets",
+    price: 131.0,
+    prescriptionRequired: false,
+    usageInstructions: "Take 1 tablet daily after food with a full glass of water for bone density support.",
+    safetyWarnings: "Contraindicated in patients with hypercalcemia or severe kidney stones.",
+    sideEffects: ["Constipation", "Flatulence"],
+    inStock: true,
+    manufacturer: "Torrent Pharmaceuticals",
+  },
+  {
+    id: "med-becosules-capsules",
+    name: "Becosules Capsules",
+    genericName: "Vitamin B-Complex with Vitamin C",
+    brandName: "Pfizer",
+    category: "vitamins_supplements",
+    dosageForm: "Capsule",
+    strength: "High Potency",
+    packSize: "Strip of 20 capsules",
+    price: 52.0,
+    prescriptionRequired: false,
+    usageInstructions: "Take 1 capsule daily after a meal for canker sores, fatigue, and immunity.",
+    safetyWarnings: "Do not crush or chew capsules; swallow whole with water.",
+    sideEffects: ["Mild stomach upset"],
+    inStock: true,
+    manufacturer: "Pfizer India",
+  },
+  {
     id: "med-vitamin-c-zinc",
     name: "Limcee Plus (Vitamin C + Zinc)",
     genericName: "Ascorbic Acid 500mg + Zinc 5mg",
@@ -233,23 +441,6 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     inStock: true,
     manufacturer: "Abbott Healthcare",
   },
-  {
-    id: "med-calcium-vitamin-d3",
-    name: "Shelcal 500",
-    genericName: "Calcium 500mg + Vitamin D3 250 IU",
-    brandName: "Torrent",
-    category: "vitamins_supplements",
-    dosageForm: "Tablet",
-    strength: "500mg / 250 IU",
-    packSize: "Strip of 15 tablets",
-    price: 132.0,
-    prescriptionRequired: false,
-    usageInstructions: "Take 1 tablet daily after lunch or dinner with water.",
-    safetyWarnings: "Contraindicated in hypercalcemia or severe kidney stones.",
-    sideEffects: ["Mild constipation", "Bloating"],
-    inStock: true,
-    manufacturer: "Torrent Pharmaceuticals",
-  },
 
   // ANTIBIOTICS (Strictly Prescription Required)
   {
@@ -261,11 +452,11 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     dosageForm: "Tablet",
     strength: "500 mg",
     packSize: "Strip of 5 tablets",
-    price: 125.0,
+    price: 119.5,
     prescriptionRequired: true,
-    usageInstructions: "Take 1 tablet once daily for 3 to 5 days, preferably 1 hour before or 2 hours after meals.",
-    safetyWarnings: "SCHEDULE H1 PRESCRIPTION DRUG. Complete full course even if feeling better to avoid antibiotic resistance. Caution with QT prolongation.",
-    sideEffects: ["Abdominal cramps", "Loose stools", "Nausea"],
+    usageInstructions: "Take 1 tablet once daily 1 hour before or 2 hours after meals for 3 to 5 days as prescribed.",
+    safetyWarnings: "Schedule H1 antibiotic. Do not stop midway even if symptoms resolve.",
+    sideEffects: ["Abdominal cramps", "Diarrhea", "Nausea"],
     inStock: true,
     manufacturer: "Alembic Pharmaceuticals",
   },
@@ -278,11 +469,11 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     dosageForm: "Tablet",
     strength: "625 mg",
     packSize: "Strip of 10 tablets",
-    price: 204.0,
+    price: 223.5,
     prescriptionRequired: true,
-    usageInstructions: "Take 1 tablet twice daily with meals for 5 to 7 days as prescribed by clinician.",
-    safetyWarnings: "SCHEDULE H1 DRUG. Check for penicillin allergies before ingestion. Report severe diarrhea promptly.",
-    sideEffects: ["Diarrhea", "Vomiting", "Skin rash (allergic reaction)"],
+    usageInstructions: "Take 1 tablet twice daily with meals for complete prescribed duration (usually 5 to 7 days).",
+    safetyWarnings: "Schedule H1 prescription medicine. Complete full prescribed course to prevent antimicrobial resistance.",
+    sideEffects: ["Diarrhea", "Mild nausea", "Vomiting"],
     inStock: true,
     manufacturer: "GlaxoSmithKline Pharmaceuticals",
   },
@@ -314,11 +505,11 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
     dosageForm: "Tablet",
     strength: "40 mg",
     packSize: "Strip of 30 tablets",
-    price: 245.0,
+    price: 240.0,
     prescriptionRequired: true,
-    usageInstructions: "Take 1 tablet once daily morning or evening with water.",
-    safetyWarnings: "Contraindicated in pregnancy. Monitor serum potassium and creatinine regularly.",
-    sideEffects: ["Dizziness", "Fatigue", "Back pain"],
+    usageInstructions: "Take 1 tablet once daily at the same time each day for essential hypertension.",
+    safetyWarnings: "Monitor blood pressure regularly. Do not take during pregnancy.",
+    sideEffects: ["Dizziness", "Back pain", "Sinus infection"],
     inStock: true,
     manufacturer: "Glenmark Pharmaceuticals",
   },
@@ -326,18 +517,18 @@ export const MEDICATIONS_CATALOG: MedicationItem[] = [
   // DIABETES (Prescription Required)
   {
     id: "med-metformin-500",
-    name: "Glycomet 500 SR",
-    genericName: "Metformin Hydrochloride Sustained Release 500mg",
-    brandName: "USV India",
+    name: "Glycomet-GP 1",
+    genericName: "Metformin 500mg + Glimepiride 1mg",
+    brandName: "USV",
     category: "diabetes",
     dosageForm: "Tablet",
-    strength: "500 mg",
-    packSize: "Strip of 20 tablets",
-    price: 52.0,
+    strength: "500mg / 1mg",
+    packSize: "Strip of 15 tablets",
+    price: 98.0,
     prescriptionRequired: true,
-    usageInstructions: "Take 1 tablet twice daily with or immediately after meals.",
-    safetyWarnings: "Swallow sustained release tablet whole; do not break. Discontinue prior to iodinated radiocontrast procedures.",
-    sideEffects: ["Metallic taste", "Flatulence", "Mild stomach discomfort"],
+    usageInstructions: "Take 1 tablet once daily immediately before breakfast or main meal.",
+    safetyWarnings: "Watch for signs of hypoglycemia (shakiness, sweat, palpitations).",
+    sideEffects: ["Hypoglycemia", "Metallic taste", "Nausea"],
     inStock: true,
     manufacturer: "USV Private Limited",
   },
@@ -360,7 +551,28 @@ export function getAllMedications(): MedicationItem[] {
 }
 
 export function getMedicationById(id: string): MedicationItem | undefined {
-  return MEDICATIONS_CATALOG.find((m) => m.id === id);
+  if (!id) return undefined;
+
+  // Direct match by slug
+  const direct = MEDICATIONS_CATALOG.find((m) => m.id === id);
+  if (direct) return direct;
+
+  // Lookup by UUID map
+  const mappedSlug = MEDICATION_UUID_MAP[id];
+  if (mappedSlug) {
+    const foundByMap = MEDICATIONS_CATALOG.find((m) => m.id === mappedSlug);
+    if (foundByMap) return foundByMap;
+  }
+
+  // Lookup if passed ID is slug mapped in reverse
+  const mappedUuid = MEDICATION_SLUG_TO_UUID[id];
+  if (mappedUuid) {
+    const foundByUuid = MEDICATIONS_CATALOG.find((m) => m.id === mappedUuid);
+    if (foundByUuid) return foundByUuid;
+  }
+
+  // Fallback case-insensitive match
+  return MEDICATIONS_CATALOG.find((m) => m.id.toLowerCase() === id.toLowerCase());
 }
 
 export function filterMedications(params: {
@@ -394,4 +606,3 @@ export function filterMedications(params: {
 
   return results;
 }
-
